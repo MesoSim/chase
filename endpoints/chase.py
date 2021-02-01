@@ -1,4 +1,4 @@
-#!/home/jthielen/miniconda3/envs/chase/bin/python
+#!/usr/bin/env python
 
 """
 Chase Applet Endpoint
@@ -27,17 +27,19 @@ What this script does when run:
 import cgi
 from datetime import datetime
 import json
-from ChaseLib.App import *
-from ChaseLib.functions import *
-from ChaseLib.hazards import create_hazard_registry, shuffle_new_hazard
+
+from mesosim.core.config import Config
+from mesosim.chase.actions import create_hazard_registry, shuffle_new_hazard
+from mesosim.chase.team import Team
 
 
 # Constants
-master_db_file = 'main.db'
-team_db_dir = 'teams/'
+master_db_file = '/home/jthielen/main.db'
+team_db_dir = '/home/jthielen/teams/'
 
 # Wrap full process to safely catch errors
-config = team = None
+config = None
+team = None
 try:
     # Establish core config
     config = Config(master_db_file)
@@ -53,7 +55,7 @@ try:
     refuel = bool(form.getvalue('refuel'))
 
     # Set Up Team
-    team = Team(team_db_dir + team_id + '.db', hazards=hazard_registry, config=config)
+    team = Team(team_db_dir + team_id + '.db', hazard_registry=hazard_registry, config=config)
     message_list = []
 
     # Sanitize input values
@@ -77,6 +79,13 @@ try:
 
     # Gas management
     if refuel:
+        if team.fuel_level <= 0:
+            # TODO this is broken, need to add a flag instead
+            team.balance -= config.aaa_fee
+            message_list.append(
+                "You have been charged " + money_format(config.aaa_fee) + " to get someone "
+                "to fill your vehicle up."
+            )
         fuel_amt = min(diff_time.seconds * config.fill_rate,
                        team.vehicle.fuel_cap - team.fuel_level)
         team.fuel_level += fuel_amt
@@ -91,8 +100,10 @@ try:
                                 ': You are running on fumes! Better call for help.')
 
     # Current hazard/hazard expiry
-    if (team.active_hazard is not None and
-            team.active_hazard.expiry_time <= datetime.now(tz=pytz.UTC)):
+    if (
+        team.active_hazard is not None
+        and team.active_hazard.expiry_time <= datetime.now(tz=pytz.UTC)
+    ):
         message_list.append(team.active_hazard.generate_expiry_message())
         team.clear_active_hazard()
 
@@ -113,7 +124,10 @@ try:
         queued_hazard = shuffle_new_hazard(team, diff_time.seconds, hazard_registry)
 
     # Apply the queued hazard if it overrides a current hazard (otherwise ignore)
-    if team.active_hazard is None or team.active_hazard.overridden_by(queued_hazard):
+    if (
+        queued_hazard is not None
+        and (team.active_hazard is None or team.active_hazard.overridden_by(queued_hazard)
+    ):
         team.apply_hazard(queued_hazard)  # actually make it take effect
         message_list.append(queued_hazard.generate_message())
         team.dismiss_action(queued_hazard)  # in case it was from DB

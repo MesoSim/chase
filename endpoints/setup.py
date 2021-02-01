@@ -1,4 +1,4 @@
-#!/home/jthielen/miniconda3/envs/chase/bin/python
+#!/usr/bin/env python
 
 """
 Chase Setup Endpoint
@@ -28,13 +28,13 @@ or, if location
 import cgi
 from datetime import datetime
 import json
-from ChaseLib.App import *
-from ChaseLib.functions import *
+from mesosim.chase.vehicle import Vehicle
+from mesosim.core.config import Config
 
 
 # Constants
-master_db_file = 'main.db'
-team_db_dir = 'teams/'
+master_db_file = '/home/jthielen/main.db'
+team_db_dir = '/home/jthielen/teams/'
 
 
 # Input Handling

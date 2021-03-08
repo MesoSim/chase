@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+        <link href="assets/custom.css" rel="stylesheet">
+        
+        <title>Set Up Team - ISU AMS Chase Simulation</title>
+  </head>
+  <body class="default-background">
+        <div class="container-fluid">
+            <div class="row justify-content-center pt-4">
+                <div class="col-md-8 text-center">
+                    <img class="img-fluid" src="assets/SplashPage_Logo_White.svg" alt="Chase Simulation Logo">
+                </div>
+            </div>
+            <div class="row justify-content-center mt-4 pb-4" id="team-name-form">
+                <div class="col-md-8">
+                    <form class="light-background shadowed p-3">
+                        <div class="form-group row">
+                            <label for="team-id" class="col-sm-3 col-form-label">Team Name</label>
+                            <div class="col-sm-9"><input type="text" class="form-control" id="team-name" onkeyup="refreshTeamId()"></div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="team-id" class="col-sm-3 col-form-label">Team ID Code</label>
+                            <div class="col-sm-9"><input type="text" class="form-control-plaintext" id="team-id"></div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="pin" class="col-sm-3 col-form-label">PIN</label>
+                            <div class="col-sm-9"><input type="number" class="form-control" id="pin"></div>
+                        </div>
+                        <button type="button" class="btn btn-primary btn-block" onclick="submitNewTeam()">Submit</button>
+                    </form>
+                </div>
+            </div>
+            <div class="row justify-content-center mt-4 pb-4" id="vehicle-selection">
+                <div class="col-md-8">
+                    <div class="mb-3 p-3 light-background shadowed text-center">
+                        <h2 class="mb-0">Select Your Vehicle</h2>
+                    </div>
+                    <div class="card mb-3 p-3 vehicle-card light-background shadowed" id="vehicle-card-template">
+                        <div class="row no-gutters">
+                            <div class="col-sm-3 vehicle-card-img"><img src="assets/Vehicle_Bitmaps/sedan.bmp" alt="sedan" class="card-img"></div>
+                            <div class="col-sm-9 vehicle-card-info">
+                                <div class="card-body">
+                                    <h5 class="card_title">Sedan</h5>
+                                    <p class="card-text">Top Speed: <span class="top-speed"></span></p>
+                                    <p class="card-text">MPG: <span class="mpg"></span></p>
+                                    <p class="card-text">Fuel Capacity: <span class="fuel-capacity"></span></p>
+                                    <p class="card-text">Traction Rating: <span class="traction-rating"></span></p>
+                                    <button class="btn btn-secondary btn-block" type="button" class="vehicle-selection-button" data-vehicle-id="sedan" onclick="selectVehicle(this)">Select This Vehicle</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mb-3 p-3 vehicle-card light-background shadowed">
+                        <div class="row no-gutters">
+                            <div class="col-sm-3 vehicle-card-img"><img src="assets/Vehicle_Bitmaps/pickup.bmp" alt="pickup" class="card-img"></div>
+                            <div class="col-sm-9 vehicle-card-info">
+                                <div class="card-body">
+                                    <h5 class="card_title">Pickup</h5>
+                                    <p class="card-text">Top Speed: <span class="top-speed"></span></p>
+                                    <p class="card-text">MPG: <span class="mpg"></span></p>
+                                    <p class="card-text">Fuel Capacity: <span class="fuel-capacity"></span></p>
+                                    <p class="card-text">Traction Rating: <span class="traction-rating"></span></p>
+                                    <button class="btn btn-secondary btn-block" type="button" class="vehicle-selection-button" data-vehicle-id="pickup" onclick="selectVehicle(this)">Select This Vehicle</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row justify-content-center mt-4 pb-4" id="team-info">
+                <div class="col-md-8">
+                    <div class="mb-3 p-3 light-background shadowed">
+                        <h2 id="team-name-header" class="text-center">Insert Team Name Here</h2>
+
+                        <div id="team-info-msg" class="alert alert-success d-none" style="font-size: 1.25rem;">No easter egg for you...</div>
+
+                        <p class="font-italic">Write these down (needed to regain access):</p>
+                        <p>Team ID Code: <span id="write-down-team-id"></span></p>
+                        <p>PIN: <span id="write-down-pin"></span></p>
+
+                        <div class="card mb-3 p-3 vehicle-card">
+                            <div class="row no-gutters">
+                                <div class="col-sm-12 text-center">
+                                    <h4>Your Vehicle</h4>
+                                </div>
+                            </div>
+                            <div class="row no-gutters">
+                                <div class="col-sm-3 vehicle-card-img"><img src="assets/Vehicle_Bitmaps/sedan.bmp" alt="sedan" class="card-img"></div>
+                                <div class="col-sm-9 vehicle-card-info">
+                                    <div class="card-body">
+                                        <h5 class="card_title">Sedan</h5>
+                                        <p class="card-text">Top Speed: <span class="top-speed"></span></p>
+                                        <p class="card-text">MPG: <span class="mpg"></span></p>
+                                        <p class="card-text">Fuel Capacity: <span class="fuel-capacity"></span></p>
+                                        <p class="card-text">Traction Rating: <span class="traction-rating"></span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-secondary">
+                            <p class="mt-3">Wait for the chase briefing...</p>
+                            <p>You will be instructed when to continue...</p>
+                        </div>
+
+                        <button class="btn btn-lg btn-primary btn-block" onclick="continueToPlacefiles()" type="button">Continue</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row justify-content-center mt-4 pb-4" id="placefiles">
+                <div class="col-md-8">
+                    <form class="light-background shadowed p-3">
+                        <div class="form-group row">
+                            <h4 class="ml-3 mr-3">Enter Warnings, Radar Data Source, and Placefiles</h4>
+                            <p class="ml-3 mr-3">(Don't worry if you run out of time now; these will also be available later from the chase app.)</p>
+                            <p class="ml-3 mr-3">Entries marked with * are required, others optional</p>
+                        </div>
+                        <div class="form-group row">
+                            <label for="l2-source" class="col-sm-3 col-form-label">Level II Data Source*</label>
+                            <div class="col-sm-9"><input type="text" class="form-control" id="l2-source" readonly value="https://l2.chase.iawx.info/"></div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="warnings-source" class="col-sm-3 col-form-label">Warnings*</label>
+                            <div class="col-sm-9"><input type="text" class="form-control" id="warnings-source" readonly value="https://warnings.chase.iawx.info/"></div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="lsr-placefile" class="col-sm-3 col-form-label">LSR Placefile*</label>
+                            <div class="col-sm-9"><input type="text" class="form-control" id="lsr-placefile" readonly value="https://chase.iawx.info/api/placefile/lsr/content"></div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="team-current" class="col-sm-3 col-form-label">Team Location Placefile*</label>
+                            <div class="col-sm-9"><input type="text" class="form-control" id="team-current" readonly value="https://chase.iawx.info/api/placefile/team/team-id/current/content"></div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="team-tracks" class="col-sm-3 col-form-label">Team Location With Trailing Track Placefile</label>
+                            <div class="col-sm-9"><input type="text" class="form-control" id="team-tracks" readonly value="https://chase.iawx.info/api/placefile/team/team-id/tracks/content"></div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="team-history" class="col-sm-3 col-form-label">Full Team Location History Placefile</label>
+                            <div class="col-sm-9"><input type="text" class="form-control" id="team-history" readonly value="https://chase.iawx.info/api/placefile/team/team-id/history/content"></div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="all-current" class="col-sm-3 col-form-label">All Teams Current Position Placefile</label>
+                            <div class="col-sm-9"><input type="text" class="form-control" id="all-current" readonly value="https://chase.iawx.info/api/placefile/team/current/content"></div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="all-tracks" class="col-sm-3 col-form-label">All Teams Location With Trailing Track Placefile</label>
+                            <div class="col-sm-9"><input type="text" class="form-control" id="all-tracks" readonly value="https://chase.iawx.info/api/placefile/team/tracks/content"></div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="all-history" class="col-sm-3 col-form-label">All Team Full History Placefile</label>
+                            <div class="col-sm-9"><input type="text" class="form-control" id="all-history" readonly value="https://chase.iawx.info/api/placefile/team/history/content"></div>
+                        </div>
+                        <button type="button" class="btn btn-primary btn-lg btn-block" onclick="continueToLocationSelection()">Continue</button>
+                    </form>
+                </div>
+            </div>
+            <div class="row justify-content-center mt-4 pb-4" id="location-selection">
+                <div class="col-md-8">
+                    <form class="light-background shadowed p-3">
+                        <div class="form-group row">
+                            <h4 class="ml-3">Select Location</h4>
+                        </div>
+                        <div class="form-group row">
+                            <label for="lat" class="col-sm-3 col-form-label">Latitude</label>
+                            <div class="col-sm-9">
+                                <input type="number" class="form-control" id="lat" placeholder="42.03">
+                                <small class="form-text text-muted">
+                                    Latitude must be a decimal number in units of degrees north
+                                </small>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="lon" class="col-sm-3 col-form-label">Longitude</label>
+                            <div class="col-sm-9">
+                                <input type="number" class="form-control" id="lon" placeholder="-93.64">
+                                <small class="form-text text-muted">
+                                    Longitude must be a decimal number in units of degrees east (need the negative sign for CONUS!)
+                                </small>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-success btn-lg btn-block" onclick="submitLocation()">Submit Location and Start Chase</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+  
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+
+        <script>
+            var api_base = "api/";
+            
+            function string_to_slug(str) {
+                str = str.replace(/^\s+|\s+$/g, ""); // trim
+                str = str.toLowerCase();
+
+                // remove accents, swap ñ for n, etc
+                var from = "åàáãäâèéëêìíïîòóöôùúüûñç·/-,:;";
+                var to = "aaaaaaeeeeiiiioooouuuunc______";
+
+                for (var i = 0, l = from.length; i < l; i++) {
+                    str = str.replace(new RegExp(from.charAt(i), "g"), to.charAt(i));
+                }
+
+                str = str
+                    .replace(/[^a-z0-9 _]/g, "") // remove invalid chars
+                    .replace(/\s+/g, "_") // collapse whitespace and replace by -
+                    .replace(/-+/g, "_") // collapse dashes
+                    .replace(/^-+/, "") // trim - from start of text
+                    .replace(/-+$/, ""); // trim - from end of text
+
+                return str;
+            }
+            
+            function refreshTeamId() {
+                $("#team-id").val(string_to_slug($("#team-name").val()));
+            }
+
+            function submitNewTeam() {
+                localStorage.setItem("pin", $("#pin").val());
+
+                $.ajax({
+                    method: "PUSH",
+                    url: api_base + "team",
+                    cache: false,
+                    dataType: "json",
+                    data: {
+                        'team_name': $("#team-name").val(),
+                        'team_id': $("#team-id").val(),
+                        'pin': localStorage.getItem("pin")
+                    },
+                    success: checkNewSuccess,
+                    error: checkNewError
+                });
+            }
+
+            function checkNewSuccess(data, status, xhr){
+                console.log(xhr.responseText);
+
+                localStorage.setItem("team_name", data.team_name);
+                localStorage.setItem("team_id", data.team_id);
+
+                $("#team-name-header").text(data.team_name);
+                $("#write-down-team-id").text(data.team_id);
+                $("#write-down-pin").text(localStorage.getItem("pin"));
+
+                if( data.easter_egg ){
+                    localStorage.setItem("team_vehicle", data.vehicle);
+                    $("#team-name-form").addClass("d-none");
+                    $("#team-info-msg").removeClass("d-none");
+                    $("#team-info-msg").text(data.message);
+                    loadTeamVehicle();
+                    $("#team-info").removeClass("d-none");
+                } else {
+                    $("#team-name-form").addClass("d-none");
+                    loadVehicles();
+                    $("#vehicle-selection").removeClass("d-none");
+                }
+            }
+
+            function checkNewError(xhr, error, ex){
+                console.log(xhr.responseText);
+                alert("Failed to log in with giving credentials. Check your details, refresh the page, and try again.");
+            }
+
+            function loadVehicles() {
+                // TODO, sync?
+            }
+
+            function loadTeamVehicle() {
+                // TODO, sync?
+            }
+
+            function selectVehicle(elem) {
+                // TODO, be sure to add confirmation prompt
+                var vehicle = $(elem).attr("data-vehicle-id");
+                var x = confirm("Do you wish to select the " + vehicle + " as your vehicle?")
+                if( x ){
+                    localStorage.setItem("team_vehicle", data.vehicle);
+                    $("#vehicle-selection").addClass("d-none");
+                    loadTeamVehicle();
+                    $("#team-info").removeClass("d-none");
+                }
+            }
+
+            function continueToPlacefiles() {
+                $("#team-info").addClass("d-none");
+                $("#placefiles").removeClass("d-none");
+            }
+
+            function continueToLocationSelection() {
+                $("#placefiles").addClass("d-none");
+                $("#location-selction").removeClass("d-none");
+            }
+        </script>
+    </body>
+</html>

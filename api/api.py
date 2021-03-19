@@ -23,6 +23,7 @@ from mesosim.chase.team import Team
 from mesosim.chase.vehicle import Vehicle
 from mesosim.core.config import Config
 from mesosim.core.timing import arc_time_from_cur, std_fmt
+from mesosim.core.utils import move_lat_lon
 from mesosim.lsr import scale_raw_lsr_to_cur_time, gr_lsr_placefile_entry_from_tuple
 
 
@@ -37,6 +38,60 @@ team_db_dir = '/home/jthielen/teams/'
 lsr_asset_url = 'https://chase.iawx.info/assets/'
 
 config = Config(main_db_file)
+hazard_registry = create_hazard_registry(config)
+
+# Shared
+def get_team(team_id):
+    return Team(
+        team_db_dir + team_id + '.db',
+        hazard_registry=hazard_registry,
+        config=config
+    )
+
+
+def get_vehicle(vehicle_id):
+    return Vehicle(vehicle_id, config)
+
+
+def vehicle_stats(vehicle):
+    if vehicle is None:
+        return {
+            "vehicle_type": None,
+            "print_name": None,
+            "top_speed": None,
+            "mpg": None,
+            "fuel_cap": None,
+            "traction_rating": None
+        }
+    else:
+        return {
+            "vehicle_type": vehicle.vehicle_type,
+            "print_name": vehicle.print_name,
+            "top_speed": vehicle.top_speed,
+            "mpg": vehicle.mpg,
+            "fuel_cap": vehicle.fuel_cap,
+            "traction_rating": vehicle.traction_rating
+        }
+
+
+# Recreate the file header and footer texts for use in placefiles.
+def file_headertext(team_name):
+    return 'RefreshSeconds: 10\
+            \nThreshold: 999\
+            \nTitle: Location of Team %s\
+            \nFont: 1, 11, 0, "Courier New"\
+            \nIconFile: 1, 22, 22, 11, 11, "http://www.spotternetwork.org/icon/spotternet.png"\
+            \nIconFile: 2, 15, 25,  8, 25, "http://www.spotternetwork.org/icon/arrows.png"\
+            \nIconFile: 3, 22, 22, 11, 11, "http://www.spotternetwork.org/icon/sn_reports.png"\
+            \nIconFile: 4, 22, 22, 11, 11, "http://www.spotternetwork.org/icon/sn_reports_30.png"\
+            \nIconFile: 5, 22, 22, 11, 11, "http://www.spotternetwork.org/icon/sn_reports_60.png"\
+            \nIconFile: 6, 22, 22, 11, 11, "http://www.spotternetwork.org/icon/spotternet_new.png"\n' % (team_name,)
+
+def file_footertext(team_name):
+    return '\nText: 15, 10, 1, "%s"\nEnd:\n' % (team_name,)
+
+def file_footerend():
+    return '\nEnd:\n'
 
 #########
 # Teams #
@@ -137,52 +192,154 @@ api.add_resource(TeamList, '/team')
 
 class TeamResource(Resource):
     def get(self, team_id):
-        # TODO
-        # Just output team.output_status_dict()
-        return {"hello": "world"}
+        return get_team(team_id).output_status_dict()
 
     def put(self, team_id):
-        # TODO
-        # request.form['data']
-        # pin, speed, direction, refuel
         # (this is the chase.py replacement)
         # OUTPUT: team.output_status_dict() combined with messages
-        return {"hello": "world"}
+        try:
+            pin = request.form['pin']
+            speed = float(request.form['speed'])
+            direction = float(request.form['direction'])
+            refuel = bool(request.form['refuel'])
+
+            team = get_team(team_id)
+            message_list = []
+
+            if team.pin != pin:
+                return {"error": True, "error_message": "invalid pin"}, 403
+
+            # Sanitize input values
+            if team.cannot_refuel:
+                refuel = False
+
+            if refuel or speed <= 0 or team.stopped or team.fuel_level <= 0:
+                speed = 0
+                direction = 0
+
+            if speed > team.current_max_speed():
+                speed = team.current_max_speed()
+
+            # Movement Updates
+            current_time = datetime.now(tz=pytz.UTC)
+            diff_time = current_time - team.last_update_time
+            distance = speed * config.speed_factor * diff_time.seconds / 3600
+            team.lat, team.lon = move_lat_lon(team.lat, team.lon, distance, direction)
+            team.speed = speed
+            team.direction = direction
+
+            # Gas management
+            if refuel:
+                if team.fuel_level <= 0:
+                    # TODO this is broken, need to add a flag instead
+                    team.balance -= config.aaa_fee
+                    message_list.append(
+                        "You have been charged " + money_format(config.aaa_fee) + " to get someone "
+                        "to fill your vehicle up."
+                    )
+                fuel_amt = min(diff_time.seconds * config.fill_rate,
+                            team.vehicle.fuel_cap - team.fuel_level)
+                team.fuel_level += fuel_amt
+                team.balance -= fuel_amt * config.gas_price
+                done_refueling = (team.fuel_level >= team.vehicle.fuel_cap - .01)
+            else:
+                fuel_amt = distance / team.vehicle.calculate_mpg(speed)
+                team.fuel_level -= fuel_amt
+                if team.fuel_level < 0:
+                    team.fuel_level = 0
+                    message_list.append(datetime.now(tz=pytz.UTC).strftime('%H%MZ') +
+                                        ': You are running on fumes! Better call for help.')
+
+            # Current hazard/hazard expiry
+            if (
+                team.active_hazard is not None
+                and team.active_hazard.expiry_time <= datetime.now(tz=pytz.UTC)
+            ):
+                message_list.append(team.active_hazard.generate_expiry_message())
+                team.clear_active_hazard()
+
+            # Check queue for action items (either instant action or a hazard to queue)
+            queued_hazard = None
+            if team.has_action_queue_items():
+                for action in team.get_action_queue(hazard_registry):
+                    if not action.is_hazard:
+                        if action.is_adjustment:
+                            team.apply_action(action)
+                        message_list.append(action.generate_message())
+                        team.dismiss_action(action)
+                    elif action.is_hazard and queued_hazard is None:
+                        queued_hazard = action
+
+            # If no hazard queued, shuffle in a chance of a random hazard
+            if queued_hazard is None:
+                queued_hazard = shuffle_new_hazard(team, diff_time.seconds, hazard_registry)
+
+            # Apply the queued hazard if it overrides a current hazard (otherwise ignore)
+            if (
+                queued_hazard is not None
+                and (team.active_hazard is None or team.active_hazard.overridden_by(queued_hazard))
+            ):
+                team.apply_hazard(queued_hazard)  # actually make it take effect
+                message_list.append(queued_hazard.generate_message())
+                team.dismiss_action(queued_hazard)  # in case it was from DB
+
+            team.write_status()
+
+            output = team.output_status_dict()
+            output['messages'] = message_list
+
+            return output
+        except Exception as exc:
+            return {"error": True, "error_message": str(exc)}, 500
 
 api.add_resource(TeamResource, '/team/<team_id>')
 
 class TeamLocation(Resource):
     def get(self, team_id):
-        # TODO
+        team = get_team(team_id)
         return {
-            "lat": 42.0,
-            "lon": -95.0
+            "lat": team.lat,
+            "lon": team.lon
         }
 
     def put(self, team_id):
-        # TODO
-        # request.form['data']
-        # pin, lat, lon
+        team = get_team(team_id)
+
+        if team.pin != request.form['pin']:
+            return {"error": True, "error_message": "invalid pin"}, 403
+
+        team.lat = float(request.form['lat'])
+        team.lon = float(request.form['lon'])
+
+        team.write_status()
+
         return {
             "success": True,
-            "lat": 42.0,
-            "lon": -95.0
+            "lat": team.lat,
+            "lon": team.lon
         }
 
 api.add_resource(TeamLocation, '/team/<team_id>/location')
 
 class TeamVehicle(Resource):
     def get(self, team_id):
-        # TODO
-        # Reuse from vehicle below
-        return {"hello": "world"}
+        team = get_team(team_id)
+        return vehicle_stats(team.vehicle)
 
     def put(self, team_id):
-        # TODO
-        # request.form['data']
-        # pin, vehicle_type
-        # OUTPUT: (like output from vehicle list below, under the vehicle field)
-        return {"hello": "world"}
+        team = get_team(team_id)
+
+        if team.pin != request.form['pin']:
+            return {"error": True, "error_message": "invalid pin"}, 403
+        
+        team.status["vehicle"] = request.form['vehicle_type']
+
+        team.write_status()
+
+        return {
+            "success": True,
+            "vehicle": vehicle_stats(get_vehicle(request.form['vehicle_type']))
+        }
 
 api.add_resource(TeamVehicle, '/team/<team_id>/vehicle')
 
@@ -196,14 +353,29 @@ api.add_resource(TeamVehicle, '/team/<team_id>/vehicle')
 
 class TeamVerify(Resource):
     def put(self, team_id):
-        # TODO
-        # request.form['data']
-        # pin
-        return {
-            "team_name": "FILLER",
-            "needs_setup": False,
-            "setup_step": ""
-        }
+        team = get_team(team_id)
+
+        if team.pin != request.form['pin']:
+            return {"error": True, "error_message": "invalid pin"}, 403
+        
+        if team.vehicle is None:
+            return {
+                "team_name": team.name,
+                "needs_setup": True,
+                "setup_step": "vehicle-selection"
+            }
+        elif team.lat is None:
+            return {
+                "team_name": team.name,
+                "needs_setup": True,
+                "setup_step": "location-selection"
+            }
+        else:
+            return {
+                "team_name": team.name,
+                "needs_setup": False,
+                "setup_step": ""
+            }
 
 api.add_resource(TeamVerify, '/team/<team_id>/verify')
 
@@ -213,8 +385,42 @@ api.add_resource(TeamVerify, '/team/<team_id>/verify')
 
 class PlacefileLsrContent(Resource):
     def get(self):
-        # TODO
-        output = "LSR CONTENT HERE"
+        url = lsr_asset_url
+        output = "\n\n"
+        output += "RefreshSeconds: 5\n"
+        output += "Threshold: 999\n"
+        output += "Title: Live Storm Reports (LSRs)\n"
+        output += 'Font: 1, 11, 0, "Courier New"\n'
+        output += f'IconFile: 1, 25, 25, 11, 11, "{url}Lsr_FunnelCloud_Icon.png"\n'
+        output += f'IconFile: 2, 25, 32, 11, 11, "{url}Lsr_Hail_Icons.png"\n'
+        output += f'IconFile: 3, 25, 25, 11, 11, "{url}Lsr_Tornado_Icon.png"\n'
+        output += f'IconFile: 4, 25, 25, 11, 11, "{url}Lsr_TstmWndDmg_Icon.png"\n\n'
+
+        hours_valid = config.lsr_hours_valid  # LSR Validity (archive time)
+        remark_wrap_length = int(config.get_config_value("lsr_remark_wrap_length"))  # Text Wrapping
+        
+        lsr_con = sql.connect(lsr_db_file)
+        lsr_cur = lsr_con.cursor()
+        
+        # Prep the time interval (arc time)
+        t1 = arc_time_from_cur(datetime.now(tz=pytz.UTC), timings=config.timings)
+        t0 = t1 - timedelta(hours=hours_valid)
+        t0, t1 = (t.strftime(std_fmt) for t in [t0, t1])
+
+        # Get the data
+        lsr_cur.execute("SELECT * FROM lsrs_raw WHERE valid BETWEEN ? AND ?", [t0, t1])
+        lsrs_raw = lsr_cur.fetchall()
+
+        # Scale the data to cur time
+        lsrs_scaled = scale_raw_lsr_to_cur_time(lsrs_raw, timings=config.timings)
+
+        # Output the LSRs
+        for lsr_tuple in lsrs_scaled:
+            output += gr_lsr_placefile_entry_from_tuple(
+                lsr_tuple,
+                wrap_length=remark_wrap_length
+            ) + '\n'
+        
         response = make_response(output)
         response.headers['content-type'] = 'text/plain'
         return response
@@ -223,10 +429,62 @@ api.add_resource(PlacefileLsrContent, '/placefile/lsr/content')
 
 class PlacefileLsrLoad(Resource):
     def post(self):
-        # TODO
-        # request.form['data']
-        # 'auth', 'start', 'end', 'wfos'
-        return {"count": -1}
+        if config.get_config_value('auth') != request.form['auth']:
+            return {"error": True, "error_message": "invalid auth"}, 403
+
+        endpoint_args = {
+            'start': request.form['start'],
+            'end': request.form['end'],
+            'wfos': request.form['wfos']
+        }
+        lsr_endpoint = (
+            "http://mesonet.agron.iastate.edu/geojson/lsr.php"
+            + "?sts={start}&ets={end}&wfos={wfos}".format(**endpoint_args)
+        )
+
+        lsr_request = requests.get(lsr_endpoint)
+        lsrs = lsr_request.json()["features"]
+
+        lsr_con = sql.connect(lsr_db_file)
+        lsr_cur = lsr_con.cursor()
+        lsr_cur.execute(
+            "CREATE TABLE lsrs_raw (city char, county char, lat decimal, "
+            + "lon decimal,magnitude char, remark char, source char, st char, "
+            + "type char, typetext char, valid datetime, wfo char)"
+        )
+        lsr_con.commit()
+
+        # Save the data
+        print("Loading into local database...")
+
+        query = (
+            "INSERT INTO lsrs_raw (city, county, lat, lon, magnitude, remark, "
+            + "source, st, type, typetext, valid, wfo) VALUES "
+            + "(?,?,?,?,?,?,?,?,?,?,?,?)"
+        )
+        for lsr_row in lsrs:
+            lsr = lsr_row["properties"]
+            if type_to_icon(lsr["type"]):
+                lsr_cur.execute(
+                    query,
+                    [
+                        lsr["city"],
+                        lsr["county"],
+                        lsr["lat"],
+                        lsr["lon"],
+                        lsr["magnitude"],
+                        lsr["remark"],
+                        lsr["source"],
+                        lsr["st"],
+                        lsr["type"],
+                        lsr["typetext"],
+                        lsr["valid"],
+                        lsr["wfo"],
+                    ],
+                )
+        lsr_con.commit()
+
+        return {"count": len(lsrs)}
 
 api.add_resource(PlacefileLsrLoad, '/placefile/lsr/load')
 
@@ -280,25 +538,16 @@ api.add_resource(PlacefileSingleTeamHistoryContent, '/placefile/team/<team_id>/h
 
 class VehicleList(Resource):
     def get(self):
-        # TODO
+        config.cur.execute("SELECT vehicle_type FROM vehicles WHERE shown_in_list = 1")
         return [
-            {
-                "vehicle_type": "sedan",
-                "print_name": "Sedan",
-                "top_speed": 100,
-                "mpg": 40,
-                "fuel_cap": 12,
-                "traction_rating": "C-",
-            }
+            vehicle_stats(get_vehicle(r[0])) for r in config.cur.fetchall()
         ]
 
 api.add_resource(VehicleList, '/vehicle')
 
 class VehicleResource(Resource):
     def get(self, vehicle_id):
-        # TODO
-        # See list above
-        return {"hello": "world"}
+        return vehicle_stats(get_vehicle(vehicle_id))
 
 api.add_resource(VehicleResource, '/vehicle/<vehicle_id>')
 
@@ -308,33 +557,52 @@ api.add_resource(VehicleResource, '/vehicle/<vehicle_id>')
 
 class SimTimings(Resource):
     def get(self):
-        # TODO
-        # See args below
-        return {"hello": "world"}
+        return {field: config.get_config_value(field) for field in (
+            "simulation_running",
+            "arc_start_time",
+            "cur_start_time",
+            "speed_factor"
+        )}
 
     def put(self):
-        # TODO
-        # request.form['data']
-        # auth, simulation_running, arc_start_time, cur_start_time, speed_factor
-        return {"hello": "world"}
+        if config.get_config_value('auth') != request.form['auth']:
+            return {"error": True, "error_message": "invalid auth"}, 403
+
+        for allowed_field in ('simulation_running', 'arc_start_time', 'cur_start_time', 'speed_factor'):
+            if allowed_field in request.form:
+                self.cur.execute(
+                    "UPDATE config SET config_value = ? WHERE config_setting = ?",
+                    [request.form[allowed_field], allowed_field]
+                )
+                self.con.commit()
+        return {"success": True}
 
 api.add_resource(SimTimings, '/simulation/timings')
 
 class SimRunning(Resource):
     def get(self):
-        # TODO
-        return {
-            "running": 1
-        }
+        running = config.get_config_value("simulation_running")
+
+        if running:
+            return {"running": 1}
+        else:
+            return {"running": 0}
 
 api.add_resource(SimRunning, '/simulation/running')
 
 class SimConfig(Resource):
     def put(self):
-        # TODO
-        # request.form['data']
-        # auth, simulation_running
-        return {"hello": "world"}
+        if config.get_config_value('auth') != request.form['auth']:
+            return {"error": True, "error_message": "invalid auth"}, 403
+
+        for allowed_field in ('simulation_running',):
+            if allowed_field in request.form:
+                self.cur.execute(
+                    "UPDATE config SET config_value = ? WHERE config_setting = ?",
+                    [request.form[allowed_field], allowed_field]
+                )
+                self.con.commit()
+        return {"success": True}
 
 api.add_resource(SimConfig, '/simulation/config')
 

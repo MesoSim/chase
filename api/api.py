@@ -66,11 +66,15 @@ api.add_resource(TeamList, '/team')
 class TeamResource(Resource):
     def get(self, team_id):
         # TODO
+        # Just output team.output_status_dict()
         return {"hello": "world"}
 
     def put(self, team_id):
         # TODO
         # request.form['data']
+        # pin, speed, direction, refuel
+        # (this is the chase.py replacement)
+        # OUTPUT: team.output_status_dict() combined with messages
         return {"hello": "world"}
 
 api.add_resource(TeamResource, '/team/<team_id>')
@@ -78,7 +82,10 @@ api.add_resource(TeamResource, '/team/<team_id>')
 class TeamLocation(Resource):
     def get(self, team_id):
         # TODO
-        return {"hello": "world"}
+        return {
+            "lat": 42.0,
+            "lon": -95.0
+        }
 
     def put(self, team_id):
         # TODO
@@ -101,33 +108,19 @@ class TeamVehicle(Resource):
     def put(self, team_id):
         # TODO
         # request.form['data']
+        # pin, vehicle_type
+        # OUTPUT: (like output from vehicle list below, under the vehicle field)
         return {"hello": "world"}
 
 api.add_resource(TeamVehicle, '/team/<team_id>/vehicle')
 
-class TeamPoints(Resource):
-    def get(self, team_id):
-        # TODO
-        return {"hello": "world"}
+# TODO
+# class TeamPoints(Resource):
+# api.add_resource(TeamPoints, '/team/<team_id>/points')
 
-    def put(self, team_id):
-        # TODO
-        # request.form['data']
-        return {"hello": "world"}
-
-api.add_resource(TeamPoints, '/team/<team_id>/points')
-
-class TeamBalance(Resource):
-    def get(self, team_id):
-        # TODO
-        return {"hello": "world"}
-
-    def put(self, team_id):
-        # TODO
-        # request.form['data']
-        return {"hello": "world"}
-
-api.add_resource(TeamBalance, '/team/<team_id>/balance')
+# TODO
+# class TeamBalance(Resource):
+# api.add_resource(TeamBalance, '/team/<team_id>/balance')
 
 class TeamVerify(Resource):
     def put(self, team_id):
@@ -244,11 +237,13 @@ api.add_resource(VehicleResource, '/vehicle/<vehicle_id>')
 class SimTimings(Resource):
     def get(self):
         # TODO
+        # See args below
         return {"hello": "world"}
 
-    def push(self):
+    def put(self):
         # TODO
         # request.form['data']
+        # auth, simulation_running, arc_start_time, cur_start_time, speed_factor
         return {"hello": "world"}
 
 api.add_resource(SimTimings, '/simulation/timings')
@@ -256,33 +251,24 @@ api.add_resource(SimTimings, '/simulation/timings')
 class SimRunning(Resource):
     def get(self):
         # TODO
-        return {"hello": "world"}
+        return {
+            "running": 1
+        }
 
 api.add_resource(SimRunning, '/simulation/running')
 
 class SimConfig(Resource):
-    def get(self):
-        # TODO
-        return {"hello": "world"}
-
-    def push(self):
+    def put(self):
         # TODO
         # request.form['data']
+        # auth, simulation_running
         return {"hello": "world"}
 
 api.add_resource(SimConfig, '/simulation/config')
 
-class SimHazardConfig(Resource):
-    def get(self):
-        # TODO
-        return {"hello": "world"}
-
-    def push(self):
-        # TODO
-        # request.form['data']
-        return {"hello": "world"}
-
-api.add_resource(SimHazardConfig, '/simulation/hazard_config')
+# TODO
+# class SimHazardConfig(Resource):
+# api.add_resource(SimHazardConfig, '/simulation/hazard_config')
 
 ##########################
 

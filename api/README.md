@@ -61,12 +61,17 @@ List links to all placefile endpoints (NOT content)
 **`/placefile/lsr`**
 
 List current LSR information, with link to content
+Give an error if not loaded (see `/placefile/lsr/load`)
 
 **`/placefile/lsr/content`**
 
 ("Content-type: text/plain")
 
 The actual, dynamically generated LSR placefile.
+
+**`/placefile/lsr/load`**
+
+Admin-only, hidden endpoint taking start, end, and wfos arguments (which are then passed as sts, ets and wfos to IEM GeoJSON endpoint) and loaded raw contents into the database. Actual lsrs are munged dynamically as the simulation runs.
 
 **`/placefile/team`**
 
@@ -102,3 +107,23 @@ List all vehicles shown in the application, with detailed information
 **`/vehicle/{vehicle-id}`**
 
 List properties for the given vehicle.
+
+### Admin
+
+**`simulation/timings`**
+
+The only admin GET, really...gets the timing information as needed to convert between archive and current time.
+
+**`simulation/start`**
+
+Used by the `run-case` backend script to update the batch of settings associated with the start of the chase.
+
+**`simulation/config`**
+
+API-based way to tweak a single setting in the database's main config. Use with caution.
+
+Hint: to stop the running of the case, `PUT {"simulation_running": 0}`.
+
+**`simulation/hazard_config`**
+
+API-based way to tweak a single setting in the database's hazard config. Use with caution.

@@ -6,11 +6,34 @@ Main API Control
 Using Flask-RESTful, this script hosts the resources for the full frontend API
 """
 
+#########
+# Setup #
+#########
+
+# Imports
+from datetime import datetime, timedelta
+import pytz
+from sqlite3 import dbapi2 as sql
+
 from flask import Flask, request, make_response
 from flask_restful import Resource, Api
+from mesosim.chase.actions import create_hazard_registry, shuffle_new_hazard
+from mesosim.chase.team import Team
+from mesosim.chase.vehicle import Vehicle
+from mesosim.core.config import Config
+from mesosim.core.timing import arc_time_from_cur, std_fmt
+from mesosim.lsr import scale_raw_lsr_to_cur_time, gr_lsr_placefile_entry_from_tuple
 
+
+# Constants
 app = Flask(__name__)
 api = Api(app)
+
+lsr_db_file = "/home/jthielen/lsr.db"
+main_db_file = "/home/jthielen/main.db"
+team_db_dir = '/home/jthielen/teams/'
+
+lsr_asset_url = 'https://chase.iawx.info/assets/'
 
 #########
 # Teams #
@@ -24,7 +47,19 @@ class TeamList(Resource):
     def push(self):
         # TODO
         # request.form['data']
-        return {"hello": "world"}
+        # team_name, team_id, pin
+        return {
+            "team_name": "FILLER",
+            "team_id": "FILLER"
+        }
+        """
+        or optionally
+        {
+            "easter_egg": True,
+            "team_vehicle": "twister_jeep",
+            "message": "We gotta go!",
+        }
+        """
 
 api.add_resource(TeamList, '/team')
 
@@ -48,13 +83,19 @@ class TeamLocation(Resource):
     def put(self, team_id):
         # TODO
         # request.form['data']
-        return {"hello": "world"}
+        # pin, lat, lon
+        return {
+            "success": True,
+            "lat": 42.0,
+            "lon": -95.0
+        }
 
 api.add_resource(TeamLocation, '/team/<team_id>/location')
 
 class TeamVehicle(Resource):
     def get(self, team_id):
         # TODO
+        # Reuse from vehicle below
         return {"hello": "world"}
 
     def put(self, team_id):
@@ -92,7 +133,12 @@ class TeamVerify(Resource):
     def put(self, team_id):
         # TODO
         # request.form['data']
-        return {"hello": "world"}
+        # pin
+        return {
+            "team_name": "FILLER",
+            "needs_setup": False,
+            "setup_step": ""
+        }
 
 api.add_resource(TeamVerify, '/team/<team_id>/verify')
 
@@ -170,13 +216,23 @@ api.add_resource(PlacefileSingleTeamHistoryContent, '/placefile/team/<team_id>/h
 class VehicleList(Resource):
     def get(self):
         # TODO
-        return {"hello": "world"}
+        return [
+            {
+                "vehicle_type": "sedan",
+                "print_name": "Sedan",
+                "top_speed": 100,
+                "mpg": 40,
+                "fuel_cap": 12,
+                "traction_rating": "C-",
+            }
+        ]
 
 api.add_resource(VehicleList, '/vehicle')
 
 class VehicleResource(Resource):
     def get(self, vehicle_id):
         # TODO
+        # See list above
         return {"hello": "world"}
 
 api.add_resource(VehicleResource, '/vehicle/<vehicle_id>')

@@ -18,7 +18,7 @@
                     <img class="img-fluid" src="assets/SplashPage_Logo_White.svg" alt="Chase Simulation Logo">
                 </div>
             </div>
-            <div class="row justify-content-center mt-4 pb-4" id="team-name-form">
+            <div class="row justify-content-center mt-4 pb-4 setup-box" id="team-name-form">
                 <div class="col-md-8">
                     <form class="light-background shadowed p-3">
                         <div class="form-group row">
@@ -37,7 +37,7 @@
                     </form>
                 </div>
             </div>
-            <div class="row justify-content-center mt-4 pb-4" id="vehicle-selection">
+            <div class="row justify-content-center mt-4 pb-4 setup-box d-none" id="vehicle-selection">
                 <div class="col-md-8">
                     <div class="mb-3 p-3 light-background shadowed text-center">
                         <h2 class="mb-0">Select Your Vehicle</h2>
@@ -57,24 +57,9 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card mb-3 p-3 vehicle-card light-background shadowed">
-                        <div class="row no-gutters">
-                            <div class="col-sm-3 vehicle-card-img"><img src="assets/Vehicle_Bitmaps/pickup.bmp" alt="pickup" class="card-img"></div>
-                            <div class="col-sm-9 vehicle-card-info">
-                                <div class="card-body">
-                                    <h5 class="card_title">Pickup</h5>
-                                    <p class="card-text">Top Speed: <span class="top-speed"></span></p>
-                                    <p class="card-text">MPG: <span class="mpg"></span></p>
-                                    <p class="card-text">Fuel Capacity: <span class="fuel-capacity"></span></p>
-                                    <p class="card-text">Traction Rating: <span class="traction-rating"></span></p>
-                                    <button class="btn btn-secondary btn-block" type="button" class="vehicle-selection-button" data-vehicle-id="pickup" onclick="selectVehicle(this)">Select This Vehicle</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
-            <div class="row justify-content-center mt-4 pb-4" id="team-info">
+            <div class="row justify-content-center mt-4 pb-4 setup-box d-none" id="team-info">
                 <div class="col-md-8">
                     <div class="mb-3 p-3 light-background shadowed">
                         <h2 id="team-name-header" class="text-center">Insert Team Name Here</h2>
@@ -85,7 +70,7 @@
                         <p>Team ID Code: <span id="write-down-team-id"></span></p>
                         <p>PIN: <span id="write-down-pin"></span></p>
 
-                        <div class="card mb-3 p-3 vehicle-card">
+                        <div class="card mb-3 p-3 vehicle-card" id="your-vehicle">
                             <div class="row no-gutters">
                                 <div class="col-sm-12 text-center">
                                     <h4>Your Vehicle</h4>
@@ -95,7 +80,7 @@
                                 <div class="col-sm-3 vehicle-card-img"><img src="assets/Vehicle_Bitmaps/sedan.bmp" alt="sedan" class="card-img"></div>
                                 <div class="col-sm-9 vehicle-card-info">
                                     <div class="card-body">
-                                        <h5 class="card_title">Sedan</h5>
+                                        <h5 class="card-title">Sedan</h5>
                                         <p class="card-text">Top Speed: <span class="top-speed"></span></p>
                                         <p class="card-text">MPG: <span class="mpg"></span></p>
                                         <p class="card-text">Fuel Capacity: <span class="fuel-capacity"></span></p>
@@ -114,13 +99,13 @@
                     </div>
                 </div>
             </div>
-            <div class="row justify-content-center mt-4 pb-4" id="placefiles">
+            <div class="row justify-content-center mt-4 pb-4 setup-box d-none" id="placefiles">
                 <div class="col-md-8">
                     <form class="light-background shadowed p-3">
-                        <div class="form-group row">
-                            <h4 class="ml-3 mr-3">Enter Warnings, Radar Data Source, and Placefiles</h4>
-                            <p class="ml-3 mr-3">(Don't worry if you run out of time now; these will also be available later from the chase app.)</p>
-                            <p class="ml-3 mr-3">Entries marked with * are required, others optional</p>
+                        <div class="form-group">
+                            <h4>Enter Warnings, Radar Data Source, and Placefiles</h4>
+                            <p>(Don't worry if you run out of time now; these will also be available later from the chase app.)</p>
+                            <p>Entries marked with * are required, others optional</p>
                         </div>
                         <div class="form-group row">
                             <label for="l2-source" class="col-sm-3 col-form-label">Level II Data Source*</label>
@@ -136,15 +121,15 @@
                         </div>
                         <div class="form-group row">
                             <label for="team-current" class="col-sm-3 col-form-label">Team Location Placefile*</label>
-                            <div class="col-sm-9"><input type="text" class="form-control" id="team-current" readonly value="https://chase.iawx.info/api/placefile/team/team-id/current/content"></div>
+                            <div class="col-sm-9"><input type="text" class="form-control" id="team-current" readonly value="https://chase.iawx.info/api/placefile/team/./current/content"></div>
                         </div>
                         <div class="form-group row">
                             <label for="team-tracks" class="col-sm-3 col-form-label">Team Location With Trailing Track Placefile</label>
-                            <div class="col-sm-9"><input type="text" class="form-control" id="team-tracks" readonly value="https://chase.iawx.info/api/placefile/team/team-id/tracks/content"></div>
+                            <div class="col-sm-9"><input type="text" class="form-control" id="team-tracks" readonly value="https://chase.iawx.info/api/placefile/team/./tracks/content"></div>
                         </div>
                         <div class="form-group row">
                             <label for="team-history" class="col-sm-3 col-form-label">Full Team Location History Placefile</label>
-                            <div class="col-sm-9"><input type="text" class="form-control" id="team-history" readonly value="https://chase.iawx.info/api/placefile/team/team-id/history/content"></div>
+                            <div class="col-sm-9"><input type="text" class="form-control" id="team-history" readonly value="https://chase.iawx.info/api/placefile/team/./history/content"></div>
                         </div>
                         <div class="form-group row">
                             <label for="all-current" class="col-sm-3 col-form-label">All Teams Current Position Placefile</label>
@@ -162,7 +147,7 @@
                     </form>
                 </div>
             </div>
-            <div class="row justify-content-center mt-4 pb-4" id="location-selection">
+            <div class="row justify-content-center mt-4 pb-4 setup-box d-none" id="location-selection">
                 <div class="col-md-8">
                     <form class="light-background shadowed p-3">
                         <div class="form-group row">
@@ -259,47 +244,139 @@
                     $("#team-info-msg").text(data.message);
                     loadTeamVehicle();
                     $("#team-info").removeClass("d-none");
+                    localStorage.setItem("setup_step", "team-info");
                 } else {
                     $("#team-name-form").addClass("d-none");
                     loadVehicles();
                     $("#vehicle-selection").removeClass("d-none");
+                    localStorage.setItem("setup_step", "vehicle-selection");
                 }
             }
 
             function checkNewError(xhr, error, ex){
                 console.log(xhr.responseText);
-                alert("Failed to log in with giving credentials. Check your details, refresh the page, and try again.");
+                alert("Failed to create new team. Check your details, refresh the page, and try again.");
             }
 
             function loadVehicles() {
-                // TODO, sync?
+                $.ajax({
+                    method: "GET",
+                    url: api_base + "vehicle",
+                    cache: false,
+                    dataType: "json",
+                    success: checkLoadVehicleSuccess,
+                    error: checkServerError
+                });
+            }
+
+            function checkLoadVehicleSuccess(data, status, xhr){
+                console.log(xhr.responseText);
+                var template = $("#vehicle-card-template");
+
+                for( var i = 0; i < data.vehicles.length; i++ ){
+                    var vehicle = data.vehicles[i];
+                    var copy = template.clone().prop("id", "vehicle-card-" + vehicle.vehicle_type);
+                    copy.find(".card-img").attr("src", "assets/Vehicle_Bitmaps/" + vehicle.vehicle_type + ".bmp");
+                    copy.find(".card-img").attr("alt", vehicle.vehicle_type);
+                    copy.find(".card-title").text(vehicle.print_name);
+                    copy.find(".top-speed").text(vehicle.top_speed);
+                    copy.find(".mpg").text(vehicle.mpg);
+                    copy.find(".fuel-capacity").text(vehicle.fuel_cap);
+                    copy.find(".traction-rating").text(vehicle.traction_rating);
+                    copy.find("button").attr("data-vehicle-id", vehicle.vehicle_type);
+                    template.after(copy);
+                }
+
+                $(".vehicle-card").removeClass("d-none");
+                template.addClass("d-none");
             }
 
             function loadTeamVehicle() {
-                // TODO, sync?
+                $.ajax({
+                    method: "PUT",
+                    url: api_base + "team/" + localStorage.getItem("team_id") + "/vehicle",
+                    cache: false,
+                    dataType: "json",
+                    data: {
+                        'pin': localStorage.getItem("pin"),
+                        'vehicle_type': localStorage.getItem("team_vehicle")
+                    },
+                    success: checkSetVehicleSuccess,
+                    error: checkServerError
+                });
             }
 
+            function checkSetVehicleSuccess(data, status, xhr){
+                console.log(xhr.responseText);
+                var card = $("#your-vehicle");
+                var vehicle = data.vehicle;
+
+                card.find(".card-img").attr("src", "assets/Vehicle_Bitmaps/" + vehicle.vehicle_type + ".bmp");
+                card.find(".card-img").attr("alt", vehicle.vehicle_type);
+                card.find(".card-title").text(vehicle.print_name);
+                card.find(".top-speed").text(vehicle.top_speed);
+                card.find(".mpg").text(vehicle.mpg);
+                card.find(".fuel-capacity").text(vehicle.fuel_cap);
+                card.find(".traction-rating").text(vehicle.traction_rating);
+            }
+            
             function selectVehicle(elem) {
-                // TODO, be sure to add confirmation prompt
                 var vehicle = $(elem).attr("data-vehicle-id");
                 var x = confirm("Do you wish to select the " + vehicle + " as your vehicle?")
                 if( x ){
-                    localStorage.setItem("team_vehicle", data.vehicle);
+                    localStorage.setItem("team_vehicle", vehicle);
                     $("#vehicle-selection").addClass("d-none");
                     loadTeamVehicle();
                     $("#team-info").removeClass("d-none");
+                    localStorage.setItem("setup_step", "team-info");
                 }
             }
 
             function continueToPlacefiles() {
                 $("#team-info").addClass("d-none");
+                loadPlacefileLinks(api_base);
                 $("#placefiles").removeClass("d-none");
+                localStorage.setItem("setup_step", "placefiles");
             }
 
             function continueToLocationSelection() {
                 $("#placefiles").addClass("d-none");
                 $("#location-selction").removeClass("d-none");
+                localStorage.setItem("setup_step", "location-selection");
             }
+
+            function submitLocation() {
+                $.ajax({
+                    method: "PUT",
+                    url: api_base + "team/" + localStorage.getItem("team_id") + "/location",
+                    cache: false,
+                    dataType: "json",
+                    data: {
+                        'pin': localStorage.getItem("pin"),
+                        'lat': $("#lat").val(),
+                        'lon': $("#lon").val(),
+                    },
+                    success: checkSetLocationSuccess,
+                    error: checkServerError
+                });
+            }
+            
+            function checkSetLocationSuccess(data, status, xhr){
+                console.log(xhr.responseText);
+                window.location.href = "chase.html";
+            }
+
+            function checkServerError(xhr, error, ex){
+                console.log(xhr.responseText);
+                alert("Connection to server lost. Refresh the page and try again. If the error continues, clear your site cache, or contact support.");
+            }
+            
+            $( document ).ready(function(){
+                if( localStorage.getItem("setup_step") ){
+                    $(".setup-box").addClass("d-none");
+                    $("#" + localStorage.getItem("setup_step")).removeClass("d-none");
+                }
+            });
         </script>
     </body>
 </html>

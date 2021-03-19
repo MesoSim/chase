@@ -19,71 +19,61 @@
                         <h3 class="mb-0" id="team-name-header">Insert Team Name Here</h3>
                         <button class="btn btn-danger right" type="button" data-toggle="modal" data-target="#placefile-modal">Placefiles</button>
                     </div>
-                    <div class="status light-background shadowed p-2 mb-2">
+                    <div class="loading light-background shadowed p-2 mb-2">
+                        <div class="spinner-border" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <p class="mt-2 mb-0">Loading team status...</p>
+                    </div>
+                    <div class="status light-background shadowed p-2 mb-2 d-none">
                         <table class="table table-bordered table-sm mb-0">
                             <tbody><tr>
                                 <th scope="row">Location</th>
-                                <td>42.089, -93.768 (5 Mi E Boone, IA)</td>
+                                <td id="team-location">Undefined</td>
                             </tr>
-                            <tr class="table-warning">
+                            <tr id="team-status-row">
                                 <th scope="row">Status</th>
-                                <td>In Chaser Convergence</td>
+                                <td id="team-status-text">Undefined</td>
                             </tr>
-                            <tr>
+                            <tr id="team-fuel-row">
                                 <th scope="row">Fuel</th>
-                                <td>5 gallons (40%) remaining <button class="btn btn-sm btn-light align-right">Refuel</button></td>
+                                <td><span id="team-fuel">Undefined</span> <button class="btn btn-sm btn-light align-right" id="refuel-button" onclick="toggleRefuel();">Refuel</button></td>
                             </tr>
-                            <tr>
+                            <tr id="team-balance-row">
                                 <th scope="row">Balance</th>
-                                <td>$75.00</td>
+                                <td id="team-balance">Undefined</td>
                             </tr>
                             <tr>
                                 <th scope="row">Points</th>
-                                <td>15</td>
+                                <td id="team-points">Undefined</td>
                             </tr>
                         </tbody></table>
                     </div>
-                    <div class="control light-background shadowed p-2 mb-2">
+                    <div class="control light-background shadowed p-2 mb-2 d-none">
                         <div class="row">
                             <div class="col">
-                                <input class="custom-range" type="range" min="0" max="135" id="speedRange" value="45"><br>
-                                Current Speed: <span id="currentSpeed">45</span> mph<br>
-                                Current Max Speed: <span class="text-warning" id="maxSpeed">45 mph</span>
+                                <input class="custom-range" type="range" min="0" max="135" id="speedRange" value="0"><br>
+                                Current Speed: <span id="currentSpeed">0</span> mph<br>
+                                Current Max Speed: <span class="text-warning" id="maxSpeed">Undefined</span>
                             </div>
                             <div class="col">
                                 <div style="max-width: 200px;" class="row">
-                                    <button class="btn btn-secondary dir-button">NW</button>
-                                    <button class="btn btn-secondary dir-button">N</button>
-                                    <button class="btn btn-primary dir-button">NE</button>
-                                    <button class="btn btn-secondary dir-button">W</button>
-                                    <button class="btn btn-secondary dir-button">Stop</button>
-                                    <button class="btn btn-secondary dir-button">E</button>
-                                    <button class="btn btn-secondary dir-button">SW</button>
-                                    <button class="btn btn-secondary dir-button">W</button>
-                                    <button class="btn btn-secondary dir-button">SE</button>
+                                    <button class="btn btn-secondary dir-button actual-dir" id="dir-315" onclick="selectDirection(this); setDirection(315);">NW</button>
+                                    <button class="btn btn-secondary dir-button actual-dir north" id="dir-0" onclick="selectDirection(this); setDirection(0);">N</button>
+                                    <button class="btn btn-secondary dir-button actual-dir" id="dir-45" onclick="selectDirection(this); setDirection(45);">NE</button>
+                                    <button class="btn btn-secondary dir-button actual-dir" id="dir-270" onclick="selectDirection(this); setDirection(270);">W</button>
+                                    <button class="btn btn-primary dir-button stop" onclick="selectDirection(this); setSpeed(0, false);">Stop</button>
+                                    <button class="btn btn-secondary dir-button actual-dir" id="dir-90" onclick="selectDirection(this); setDirection(90);">E</button>
+                                    <button class="btn btn-secondary dir-button actual-dir" id="dir-225" onclick="selectDirection(this); setDirection(225);">SW</button>
+                                    <button class="btn btn-secondary dir-button actual-dir" id="dir-180" onclick="selectDirection(this); setDirection(180);">S</button>
+                                    <button class="btn btn-secondary dir-button actual-dir" id="dir-135" onclick="selectDirection(this); setDirection(135);">SE</button>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="messages">
                         <p class="messages text-monospace light-background shadowed p-2 mb-2">
-                            0300Z: You are stuck in chaser convergence<br>
-                            0255Z: You are stuck in chaser convergence<br>
-                            0250Z: You are stuck in chaser convergence<br>
-                            0245Z: You are stuck in chaser convergence<br>
-                            0240Z: You are stuck in chaser convergence<br>
-                            0235Z: You are stuck in chaser convergence<br>
-                            0230Z: You are stuck in chaser convergence<br>
-                            0225Z: You are stuck in chaser convergence<br>
-                            0220Z: You are stuck in chaser convergence<br>
-                            0215Z: You are stuck in chaser convergence<br>
-                            0210Z: You are stuck in chaser convergence<br>
-                            0205Z: You are stuck in chaser convergence<br>
-                            0200Z: You are stuck in chaser convergence<br>
-                            0155Z: You are stuck in chaser convergence<br>
-                            0150Z: You are stuck in chaser convergence<br>
-                            0145Z: You are stuck in chaser convergence<br>
-                            0140Z: You are stuck in chaser convergence<br>
+                            Messages will show up here. Refreshing the page will clear the log.
                         </p>
                     </div>
                 </div>
@@ -93,7 +83,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="placefile-modal-label">Things you will need..</h5>
+                        <h5 class="modal-title" id="placefile-modal-label">Things you will need...</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -120,15 +110,15 @@
                             </div>
                             <div class="form-group row">
                                 <label for="team-current" class="col-sm-3 col-form-label">Team Location Placefile*</label>
-                                <div class="col-sm-9"><input type="text" class="form-control" id="team-current" readonly value="https://chase.iawx.info/api/placefile/team/team-id/current/content"></div>
+                                <div class="col-sm-9"><input type="text" class="form-control" id="team-current" readonly value="https://chase.iawx.info/api/placefile/team/./current/content"></div>
                             </div>
                             <div class="form-group row">
                                 <label for="team-tracks" class="col-sm-3 col-form-label">Team Location With Trailing Track Placefile</label>
-                                <div class="col-sm-9"><input type="text" class="form-control" id="team-tracks" readonly value="https://chase.iawx.info/api/placefile/team/team-id/tracks/content"></div>
+                                <div class="col-sm-9"><input type="text" class="form-control" id="team-tracks" readonly value="https://chase.iawx.info/api/placefile/team/./tracks/content"></div>
                             </div>
                             <div class="form-group row">
                                 <label for="team-history" class="col-sm-3 col-form-label">Full Team Location History Placefile</label>
-                                <div class="col-sm-9"><input type="text" class="form-control" id="team-history" readonly value="https://chase.iawx.info/api/placefile/team/team-id/history/content"></div>
+                                <div class="col-sm-9"><input type="text" class="form-control" id="team-history" readonly value="https://chase.iawx.info/api/placefile/team/./history/content"></div>
                             </div>
                             <div class="form-group row">
                                 <label for="all-current" class="col-sm-3 col-form-label">All Teams Current Position Placefile</label>
@@ -155,48 +145,195 @@
         <script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
 
+        <script src="assets/shared.js"></script>
         <script>
             var api_base = "api/";
+            var beats_to_next_ping = 20; // 10 seconds at 120 bpm
+            var waiting = true;
 
-            function toggleView() {
-                $(".starting-buttons").addClass("d-none");
-                $(".existing-login").removeClass("d-none");
+            function startHeartbeat() {
+                setInterval(function(){
+                    if( !waiting ){
+                        beats_to_next_ping -= 1;
+                        if( beats_to_next_ping < 1 ){
+                            waiting = true;
+                            submitStatus();
+                        }
+                    }
+                }, 500);
             }
 
-            function submitLogin() {
-                localStorage.setItem("team_id", $("#team-id").val());
-                localStorage.setItem("pin", $("#pin").val());
+            function selectDirection(item) {
+                $(".dir-button").removeClass("previous-direction");
+                $(".dir-button.btn-primary.actual-dir").addClass("previous-direction");
+                $(".dir-button").removeClass("btn-primary").addClass("btn-secondary");
+                $(item).removeClass("btn-secondary").addClass("btn-primary");
+                if( $(item).hasClass("actual-dir") && $("#speedRange").val() <= 0 ){
+                    /* Update back to old speed */
+                    setSpeed(localStorage.getItem("old_speed"));
+                }
+            }
 
+            function setDirection(value) {
+                localStorage.setItem("direction", value);
+                console.log("Direction set to " + value);
+                beats_to_next_ping = 3; // Update in 1.5 seconds
+            }
+
+            function setSpeed(value, change_button = true) {
+                localStorage.setItem("old_speed", $("#speedRange").val());
+                $("#speedRange").val(value);
+                $("#currentSpeed").text(value);
+                if( value <= 0 && change_button ){
+                    selectDirection($(".dir-button.stop"));
+                }
+                beats_to_next_ping = 3; // Update in 1.5 seconds
+            }
+
+            function submitStatus() {
                 $.ajax({
                     method: "PUT",
-                    url: api_base + "team/" + localStorage.getItem("team_id") + "/verify",
+                    url: api_base + "team/" + localStorage.getItem("team_id"),
                     cache: false,
                     dataType: "json",
                     data: {
-                        'pin': localStorage.getItem("pin")
+                        'pin': localStorage.getItem("pin"),
+                        'speed': $("#speedRange").val(),
+                        'direction': localStorage.getItem("direction"),
+                        'refuel': localStorage.getItem("is_refueling")
                     },
-                    success: checkLoginSuccess,
-                    error: checkLoginError
+                    success: checkStatusSuccess,
+                    error: checkServerError
                 });
             }
 
-            function checkLoginSuccess(data, status, xhr){
+            function checkStatusSuccess(data, status, xhr){
                 console.log(xhr.responseText);
-                if( data.team_name ){
-                    localStorage.setItem("team_name", data.team_name);
-                }
-                if( data.needs_setup ){
-                    localStorage.setItem("setup_step", data.setup_step);
-                    window.location.href = "setup.html";
-                } else{
-                    window.location.href = "chase.html";
+                setGUI(data);
+                waiting = false;
+            }
+
+            function checkServerError(xhr, error, ex){
+                console.log(xhr.responseText);
+                alert("Connection to server lost. Refresh the page and try again. If the error continues, clear your site cache, or contact support.");
+            }
+
+            function loadTeamCurrentState() {
+                if( localStorage.getItem("team_id") ){
+                    $.ajax({
+                        method: "GET",
+                        url: api_base + "team/" + localStorage.getItem("team_id"),
+                        cache: false,
+                        dataType: "json",
+                        success: checkInitialStatusSuccess,
+                        error: checkServerError
+                    });
+                } else {
+                    alert("No team ID set! Please return to login/setup page.");
                 }
             }
 
-            function checkLoginError(xhr, error, ex){
+            function checkInitialStatusSuccess(data, status, xhr){
                 console.log(xhr.responseText);
-                alert("Failed to log in with giving credentials. Check your details, refresh the page, and try again.");
+                setGUI(data);
+                waiting = false;
+                $(".status, .control").removeClass("d-none");
+                $(".loading").addClass("d-none");
             }
+
+            function setGUI(data) {
+                console.log(xhr.responseText);
+
+                $("#team-location").text(data.location);
+                $("#team-status-text").text(data.status_text);
+                $("#team-status-row").removeClass("table-success table-warning table-danger").addClass("table-" + data.status_color);
+                $("#team-fuel").text(data.fuel_text);
+                $("#team-fuel-row").removeClass("table-success table-warning table-danger").addClass("table-" + data.fuel_color);
+                if( data.fuel_on_empty_fee ){
+                    alert("You ran out of fuel!");
+                    startRefuel();
+                }
+                if( data.can_refuel ){
+                    $("#refuel-button").prop(disabled, false);
+                } else {
+                    $("#refuel-button").prop(disabled, true);
+                }
+                $("#team-balance").text(data.balance);
+                if( data.balance_color && data.balance_color != "success" ){
+                    $("#team-balance-row").removeClass("table-warning table-danger").addClass("table-" + data.balance_color);
+                }
+                $("#team-points").text(data.points);
+                $("#speedRange").prop("max", data.current_max_speed);
+                $("#maxSpeed").text("" + data.current_max_speed + " mph");
+                if( data.current_max_speed < 5 ){
+                    $("#maxSpeed").removeClass("text-warning").addClass("text-danger");
+                } else if( data.current_max_speed < 70 ){
+                    $("#maxSpeed").removeClass("text-danger").addClass("text-warning");
+                } else {
+                    $("#maxSpeed").removeClass("text-warning text-danger");
+                }
+                $("#speedRange").val(data.speed);
+                $("#currentSpeed").text(data.speed);
+                selectDirectionWithoutReset($("#dir-" + data.direction));
+                if( data.direction_lock ){
+                    $(".dir-button").prop(disabled, true);
+                } else {
+                    $(".dir-button").prop(disabled, false);
+                }
+                if( data.can_move ){
+                    $("#speedRange").prop(readonly, false);
+                } else {
+                    $("#speedRange").prop(readonly, true);
+                }
+
+                if( data.messages ){
+                    for( var i = 0; i < data.messages.length; i++ ){
+                        $("p.messages").prepend("<span>" + data.messages[i] + "</span><br>");
+                    }
+                }
+            }
+
+            function toggleRefuel() {
+                if( localStorage.getItem("is_refueling") ){
+                    stopRefuel();
+                } else {
+                    startRefuel();
+                }
+            }
+
+            function startRefuel() {
+                localStorage.setItem("is_refueling", true);
+                $("#refuel-button").removeClass("btn-light").addClass("btn-dark").text("Refueling...click to stop...");
+                setSpeed(0);
+            }
+
+            function stopRefuel() {
+                localStorage.setItem("is_refueling", false);
+                $("#refuel-button").removeClass("btn-dark").addClass("btn-light").text("Refuel");
+                setSpeed(localStorage.getItem("old_speed"));
+            }
+
+            $( document ).ready(function(){
+                $("#team-name-header").text(localStorage.getItem("team_name"));
+                $("#write-down-team-id").text(localStorage.getItem("team_id"));
+                $("#write-down-pin").text(localStorage.getItem("pin"));
+                loadPlacefileLinks(api_base);
+                loadTeamCurrentState();
+                startHeartbeat();
+            });
+
+            $("#speedRange").change(function(){
+                $("#currentSpeed").text($("#speedRange").val());
+                if( $(".stop").hasClass("btn-primary") && $("#speedRange").val() > 0 ){
+                    $(".dir-button").removeClass("btn-primary").addClass("btn-secondary");
+                    $(".previous-direction").removeClass("btn-secondary").addClass("btn-primary");
+                    $(".dir-button").removeClass("previous-direction");
+                } else if( $("#speedRange").val() <= 0 ){
+                    selectDirection($(".dir-button.stop"));
+                }
+                localStorage.setItem("old_speed", $("#speedRange").val());
+                beats_to_next_ping = 3; // Update in 1.5 seconds
+            });
         </script>
     </body>
 </html>

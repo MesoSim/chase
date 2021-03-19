@@ -12,6 +12,7 @@ Using Flask-RESTful, this script hosts the resources for the full frontend API
 
 # Imports
 from datetime import datetime, timedelta
+import os
 import pytz
 from sqlite3 import dbapi2 as sql
 
@@ -35,31 +36,102 @@ team_db_dir = '/home/jthielen/teams/'
 
 lsr_asset_url = 'https://chase.iawx.info/assets/'
 
+config = Config(main_db_file)
+
 #########
 # Teams #
 #########
 
 class TeamList(Resource):
+    def list_current_teams(self):
+        return [
+            team_db_name[:-3] for team_db_name in os.listdir(team_db_dir)
+            if team_db_name[-3:] == ".db"
+        ]
+
     def get(self):
-        # TODO
-        return {"hello": "world"}
+        return {
+            "teams": self.list_current_teams() 
+        }
 
     def push(self):
-        # TODO
-        # request.form['data']
-        # team_name, team_id, pin
-        return {
-            "team_name": "FILLER",
-            "team_id": "FILLER"
-        }
-        """
-        or optionally
-        {
-            "easter_egg": True,
-            "team_vehicle": "twister_jeep",
-            "message": "We gotta go!",
-        }
-        """
+        team_id = request.form['team_id']
+        team_name = request.form['team_name']
+        pin = request.form['pin']
+        if team_id in self.list_current_teams():
+            # ERROR: Team exists already
+            return {
+                "error": True,
+                "error_message": f"Team {team_id} already exists!"
+            }, 409
+        try:
+            # New Team
+            info_insert = 'INSERT INTO team_info (team_setting, team_value) VALUES (?,?)'
+
+            # search for team name in the database for easter egg
+            config.cur.execute(
+                'SELECT * FROM name_easter_eggs WHERE input_name = ?',
+                [team_name]
+            )
+            search_result = config.cur.fetchall()
+
+            if len(search_result) > 0:
+                # EASTER EGG FOUND!!
+                team_name = search_result[0][1]
+                message = search_result[0][2]
+                if search_result[0][3] is not None and len(search_result[0][3]) > 0:
+                    vehicle_type = search_result[0][3]
+                if search_result[0][4] is not None and float(search_result[0][4]) > 0:
+                    budget_bonus = float(search_result[0][4])
+                
+                # Handle vehicle-specific setup
+                vehicle = Vehicle(vehicle_type, config)
+                fuel_level = (1 + np.random.random()) * 0.5 * vehicle.fuel_cap
+            else:
+                budget_bonus = 0
+                vehicle = None
+
+            # Budget
+            budget = budget_bonus + config.starting_budget
+            
+            # create the team db
+            con = sql.connect(team_db_dir + team_id + '.db')
+            cur = con.cursor()
+            cur.execute('CREATE TABLE team_info (team_setting varchar, team_value varchar)')
+            cur.execute('CREATE TABLE team_history (timestamp varchar, latitude decimal, '
+                        'longitude decimal, speed decimal, direction decimal, '
+                        'status_color varchar, status_text varchar, balance decimal, '
+                        'points decimal, fuel_level decimal, active_hazard varchar)')
+            cur.execute('CREATE TABLE action_queue (action_id varchar, message varchar, '
+                        'activation_type varchar, activation_amount varchar, '
+                        'action_taken varchar)')
+            cur.execute(info_insert, ['name', team_name])
+            cur.execute(info_insert, ['id', team_id])
+            cur.execute(info_insert, ['pin', pin])
+            cur.execute(info_insert, ['balance', budget])
+            cur.execute(info_insert, ['points', 0])
+            cur.execute(info_insert, ['hazard_exp_time', None])
+            cur.execute(info_insert, ['active_hazard', None])
+            if vehicle is not None:
+                cur.execute(info_insert, ['vehicle', vehicle_type])
+                cur.execute(info_insert, ['fuel_level', fuel_level])
+            con.commit()
+
+            # Build the output
+            output = {
+                'team_id': team_id,
+                'team_name': team_name,
+                'easter_egg': False
+            }
+            if vehicle is not None:
+                output['easter_egg'] = True
+                output['vehicle'] = vehicle_type
+                output['message'] = message
+        except Exception as exc:
+            return {
+                "error": True,
+                "error_message": str(exc)
+            }, 400
 
 api.add_resource(TeamList, '/team')
 

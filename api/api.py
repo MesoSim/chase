@@ -383,7 +383,7 @@ class TeamPoints(Resource):
             "points": team.points
         }
 
-api.add_resource(TeamLocation, '/team/<team_id>/points')
+api.add_resource(TeamPoints, '/team/<team_id>/points')
 
 class TeamBalance(Resource):
     def get(self, team_id):
@@ -413,7 +413,7 @@ class TeamBalance(Resource):
             "money_formatted": money_format(team.balance)
         }
 
-api.add_resource(TeamLocation, '/team/<team_id>/location')
+api.add_resource(TeamBalance, '/team/<team_id>/balance')
 
 class TeamVerify(Resource):
     def put(self, team_id):
@@ -925,13 +925,13 @@ class SimHazardConfig(Resource):
                 updated.append(allowed_field)
         return {"success": True, "updated": updated}
 
-api.add_resource(SimConfig, '/simulation/hazard_config')
+api.add_resource(SimHazardConfig, '/simulation/hazard_config')
 
 class TestResource(Resource):
     def get(self, vehicle_id):
         return {"test": True, "time": datetime.now().strftime(std_fmt)}
 
-api.add_resource(VehicleResource, '/test')
+api.add_resource(TestResource, '/test')
 
 ##########################
 

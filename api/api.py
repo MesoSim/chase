@@ -112,7 +112,7 @@ class TeamList(Resource):
             "teams": list_current_teams() 
         }
 
-    def push(self):
+    def post(self):
         team_id = request.form['team_id']
         team_name = request.form['team_name']
         pin = request.form['pin']

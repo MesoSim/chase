@@ -586,7 +586,7 @@ class PlacefileAllTeamsCurrentContent(Resource):
                 if team.speed > 0:
                     output += f"Icon: 0,0,{team.direction:3d},2,15,\n"
                     direction = team.direction
-                    heading_row = f"Heading: {direction_angle_to_str(team.direction)}\n"
+                    heading_row = f"Heading: {direction_angle_to_str(team.direction)}\\n"
                 else:
                     direction = 0
                     heading_row = ""
@@ -640,7 +640,7 @@ class PlacefileAllTeamsTracksContent(Resource):
                 if row[3] > 0:
                     output += arrow_icon
                     direction = row[4]
-                    heading_row = f"Heading: {direction_angle_to_str(row[4])}\n"
+                    heading_row = f"Heading: {direction_angle_to_str(row[4])}\\n"
                 else:
                     direction = 0
                     heading_row = ""
@@ -696,7 +696,7 @@ class PlacefileAllTeamsHistoryContent(Resource):
                 if row[3] > 0:
                     output += f"Icon: 0,0,{row[4]:3d},2,15,\n"
                     direction = row[4]
-                    heading_row = f"Heading: {direction_angle_to_str(row[4])}\n"
+                    heading_row = f"Heading: {direction_angle_to_str(row[4])}\\n"
                 else:
                     direction = 0
                     heading_row = ""
@@ -735,7 +735,7 @@ class PlacefileSingleTeamCurrentContent(Resource):
             if team.speed > 0:
                 output += f"Icon: 0,0,{team.direction:3d},2,15,\n"
                 direction = team.direction
-                heading_row = f"Heading: {direction_angle_to_str(team.direction)}\n"
+                heading_row = f"Heading: {direction_angle_to_str(team.direction)}\\n"
             else:
                 direction = 0
                 heading_row = ""
@@ -790,7 +790,7 @@ class PlacefileSingleTeamTracksContent(Resource):
             if row[3] > 0:
                 output += arrow_icon
                 direction = row[4]
-                heading_row = f"Heading: {direction_angle_to_str(row[4])}\n"
+                heading_row = f"Heading: {direction_angle_to_str(row[4])}\\n"
             else:
                 direction = 0
                 heading_row = ""
@@ -847,7 +847,7 @@ class PlacefileSingleTeamHistoryContent(Resource):
             if row[3] > 0:
                 output += f"Icon: 0,0,{row[4]:3d},2,15,\n"
                 direction = row[4]
-                heading_row = f"Heading: {direction_angle_to_str(row[4])}\n"
+                heading_row = f"Heading: {direction_angle_to_str(row[4])}\\n"
             else:
                 direction = 0
                 heading_row = ""

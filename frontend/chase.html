@@ -242,8 +242,6 @@
             }
 
             function setGUI(data) {
-                console.log(xhr.responseText);
-
                 $("#team-location").text(data.location);
                 $("#team-status-text").text(data.status_text);
                 $("#team-status-row").removeClass("table-success table-warning table-danger").addClass("table-" + data.status_color);

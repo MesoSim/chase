@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 import os
 import pytz
 from sqlite3 import dbapi2 as sql
+import traceback
 
 from flask import Flask, request, make_response
 from flask_restful import Resource, Api
@@ -232,7 +233,11 @@ class TeamResource(Resource):
 
             # Movement Updates
             current_time = datetime.now(tz=pytz.UTC)
-            diff_time = current_time - team.last_update_time
+            try:
+                diff_time = current_time - team.last_update_time
+            except:
+                # If this gets messed up, default to usual ping
+                diff_time = 10
             distance = speed * config.speed_factor * diff_time.seconds / 3600
             team.latitude, team.longitude = move_lat_lon(team.latitude, team.longitude, distance, direction)
             team.speed = speed
@@ -299,7 +304,7 @@ class TeamResource(Resource):
 
             return output
         except Exception as exc:
-            return {"error": True, "error_message": str(exc)}, 500
+            return {"error": True, "error_message": str(exc), "traceback": traceback.format_exc()}, 500
 
 api.add_resource(TeamResource, '/team/<team_id>')
 

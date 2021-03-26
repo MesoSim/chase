@@ -157,7 +157,8 @@ class TeamList(Resource):
             con = sql.connect(team_db_dir + team_id + '.db')
             cur = con.cursor()
             cur.execute('CREATE TABLE team_info (team_setting varchar, team_value varchar)')
-            cur.execute('CREATE TABLE team_history (timestamp varchar, latitude decimal, '
+            cur.execute('CREATE TABLE team_history (cur_timestamp varchar, '
+                        'arc_timestamp varchar, latitude decimal, '
                         'longitude decimal, speed decimal, direction decimal, '
                         'status_color varchar, status_text varchar, balance decimal, '
                         'points decimal, fuel_level decimal, active_hazard varchar)')

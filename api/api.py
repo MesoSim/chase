@@ -564,25 +564,26 @@ class PlacefileAllTeamsCurrentContent(Resource):
 
             team = get_team(team_id)
 
-            output += f"Object: {team.latitude:.4f},{team.longitude:.4f}\n"
-            if team.speed > 0:
-                output += f"Icon: 0,0,{team.direction:3d},2,15,\n"
-                direction = team.direction
-                heading_row = f"Heading: {direction_angle_to_str(team.direction)}\n"
-            else:
-                direction = 0
-                heading_row = ""
-            color_code = {"green": 2, "yellow": 6, "red": 10}[team.status_color]
-            output += (
-                f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\n'
-                f'{team.last_update.strftime("%Y-%m-%d %H:%M:%S")} UTC\n'
-                f'Car type: {team.vehicle.print_name}\n'
-                f'Speed: {team.speed:.1f} mph\n{heading_row}'
-                f'Fuel Remaining: {team.fuel_level:.2f} gallons\n'
-                f'{team.status_text}"\n'
-            )
-            output += file_footerend()
-            output += "\n\n"
+            if team.latitude is not None and team.speed is not None:
+                output += f"Object: {team.latitude:.4f},{team.longitude:.4f}\n"
+                if team.speed > 0:
+                    output += f"Icon: 0,0,{team.direction:3d},2,15,\n"
+                    direction = team.direction
+                    heading_row = f"Heading: {direction_angle_to_str(team.direction)}\n"
+                else:
+                    direction = 0
+                    heading_row = ""
+                color_code = {"green": 2, "yellow": 6, "red": 10}[team.status_color]
+                output += (
+                    f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\n'
+                    f'{team.last_update.strftime("%Y-%m-%d %H:%M:%S")} UTC\n'
+                    f'Car type: {team.vehicle.print_name}\n'
+                    f'Speed: {team.speed:.1f} mph\n{heading_row}'
+                    f'Fuel Remaining: {team.fuel_level:.2f} gallons\n'
+                    f'{team.status_text}"\n'
+                )
+                output += file_footerend()
+                output += "\n\n"
 
         response = make_response(output)
         response.headers['content-type'] = 'text/plain'
@@ -612,7 +613,6 @@ class PlacefileAllTeamsTracksContent(Resource):
                 else:
                     end_time = history_rows[i + 1][0]
                     arrow_icon = ""
-                output += f"TimeRange: {start_time} {end_time}\n"
                 output += f"Object: {row[1]:.4f},{row[2]:.4f}\n"
                 if row[3] > 0:
                     output += arrow_icon
@@ -694,24 +694,26 @@ class PlacefileSingleTeamCurrentContent(Resource):
         team = get_team(team_id)
 
         output = file_headertext(team.name, preface="Current ")
-        output += f"Object: {team.latitude:.4f},{team.longitude:.4f}\n"
-        if team.speed > 0:
-            output += f"Icon: 0,0,{team.direction:3d},2,15,\n"
-            direction = team.direction
-            heading_row = f"Heading: {direction_angle_to_str(team.direction)}\n"
-        else:
-            direction = 0
-            heading_row = ""
-        color_code = {"green": 2, "yellow": 6, "red": 10}[team.status_color]
-        output += (
-            f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\n'
-            f'{team.last_update.strftime("%Y-%m-%d %H:%M:%S")} UTC\n'
-            f'Car type: {team.vehicle.print_name}\n'
-            f'Speed: {team.speed:.1f} mph\n{heading_row}'
-            f'Fuel Remaining: {team.fuel_level:.2f} gallons\n'
-            f'{team.status_text}"\n'
-        )
-        output += file_footertext(team.name)
+        
+        if team.latitude is not None and team.speed is not None:
+            output += f"Object: {team.latitude:.4f},{team.longitude:.4f}\n"
+            if team.speed > 0:
+                output += f"Icon: 0,0,{team.direction:3d},2,15,\n"
+                direction = team.direction
+                heading_row = f"Heading: {direction_angle_to_str(team.direction)}\n"
+            else:
+                direction = 0
+                heading_row = ""
+            color_code = {"green": 2, "yellow": 6, "red": 10}[team.status_color]
+            output += (
+                f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\n'
+                f'{team.last_update.strftime("%Y-%m-%d %H:%M:%S")} UTC\n'
+                f'Car type: {team.vehicle.print_name}\n'
+                f'Speed: {team.speed:.1f} mph\n{heading_row}'
+                f'Fuel Remaining: {team.fuel_level:.2f} gallons\n'
+                f'{team.status_text}"\n'
+            )
+            output += file_footertext(team.name)
 
         response = make_response(output)
         response.headers['content-type'] = 'text/plain'
@@ -739,7 +741,6 @@ class PlacefileSingleTeamTracksContent(Resource):
             else:
                 end_time = history_rows[i + 1][0]
                 arrow_icon = ""
-            output += f"TimeRange: {start_time} {end_time}\n"
             output += f"Object: {row[1]:.4f},{row[2]:.4f}\n"
             if row[3] > 0:
                 output += arrow_icon

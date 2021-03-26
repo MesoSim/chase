@@ -163,6 +163,10 @@ class TeamList(Resource):
             cur.execute('CREATE TABLE action_queue (action_id varchar, message varchar, '
                         'activation_type varchar, activation_amount varchar, '
                         'action_taken varchar)')
+            cur.execute('CREATE TABLE hazard_queue (hazard_type varchar, '
+                        'expiry_time varchar, message varchar, message_end varchar, '
+                        'overridden_by varchar, speed_limit decimal, direction_lock varchar, '
+                        'speed_lock varchar, status varchar)')
             cur.execute(info_insert, ['name', team_name])
             cur.execute(info_insert, ['id', team_id])
             cur.execute(info_insert, ['pin', pin])

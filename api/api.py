@@ -595,12 +595,12 @@ class PlacefileAllTeamsCurrentContent(Resource):
                 else:
                     color_code = {"green": 2, "yellow": 6, "red": 10}[team.status_color]
                 output += (
-                    f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\n'
-                    f'{team.last_update.strftime("%Y-%m-%d %H:%M:%S")} UTC\n'
-                    f'Car type: {team.vehicle.print_name}\n'
-                    f'Speed: {team.speed:.1f} mph\n{heading_row}'
-                    f'Fuel Remaining: {team.fuel_level:.2f} gallons\n'
-                    f'{team.status_text}"\n'
+                    f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\\n'
+                    f'{team.last_update.strftime("%Y-%m-%d %H:%M:%S")} UTC\\n'
+                    f'Car type: {team.vehicle.print_name}\\n'
+                    f'Speed: {team.speed:.1f} mph\\n{heading_row}'
+                    f'Fuel Remaining: {team.fuel_level:.2f} gallons\\n'
+                    f'{team.status_text}"'
                 )
                 output += file_footerend()
                 output += "\n\n"
@@ -650,12 +650,12 @@ class PlacefileAllTeamsTracksContent(Resource):
                     color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
                 if arrow_icon:
                     output += (
-                        f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\n'
-                        f'{start_time}\n'
-                        f'Car type: {team.vehicle.print_name}\n'
-                        f'Speed: {row[3]:.1f} mph\n{heading_row}'
-                        f'Fuel Remaining: {row[7]:.2f} gallons\n'
-                        f'{row[6]}"\n'
+                        f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\\n'
+                        f'{start_time}\\n'
+                        f'Car type: {team.vehicle.print_name}\\n'
+                        f'Speed: {row[3]:.1f} mph\\n{heading_row}'
+                        f'Fuel Remaining: {row[7]:.2f} gallons\\n'
+                        f'{row[6]}"'
                     )
                 else:
                     output += f'Icon: 0,0,{direction:3d},6,{color_code},\n'
@@ -705,12 +705,12 @@ class PlacefileAllTeamsHistoryContent(Resource):
                 else:
                     color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
                 output += (
-                    f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\n'
-                    f'{start_time}\n'
-                    f'Car type: {team.vehicle.print_name}\n'
-                    f'Speed: {row[3]:.1f} mph\n{heading_row}'
-                    f'Fuel Remaining: {row[7]:.2f} gallons\n'
-                    f'{row[6]}"\n'
+                    f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\\n'
+                    f'{start_time}\\n'
+                    f'Car type: {team.vehicle.print_name}\\n'
+                    f'Speed: {row[3]:.1f} mph\\n{heading_row}'
+                    f'Fuel Remaining: {row[7]:.2f} gallons\\n'
+                    f'{row[6]}"'
                 )
                 output += file_footertext(team.name)
                 output += '\n\n'
@@ -744,12 +744,12 @@ class PlacefileSingleTeamCurrentContent(Resource):
             else:
                 color_code = {"green": 2, "yellow": 6, "red": 10}[team.status_color]
             output += (
-                f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\n'
-                f'{team.last_update.strftime("%Y-%m-%d %H:%M:%S")} UTC\n'
-                f'Car type: {team.vehicle.print_name}\n'
-                f'Speed: {team.speed:.1f} mph\n{heading_row}'
-                f'Fuel Remaining: {team.fuel_level:.2f} gallons\n'
-                f'{team.status_text}"\n'
+                f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\\n'
+                f'{team.last_update.strftime("%Y-%m-%d %H:%M:%S")} UTC\\n'
+                f'Car type: {team.vehicle.print_name}\\n'
+                f'Speed: {team.speed:.1f} mph\\n{heading_row}'
+                f'Fuel Remaining: {team.fuel_level:.2f} gallons\\n'
+                f'{team.status_text}"'
             )
             output += file_footertext(team.name)
 
@@ -800,12 +800,12 @@ class PlacefileSingleTeamTracksContent(Resource):
                 color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
             if arrow_icon:
                 output += (
-                    f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\n'
-                    f'{start_time}\n'
-                    f'Car type: {team.vehicle.print_name}\n'
-                    f'Speed: {row[3]:.1f} mph\n{heading_row}'
-                    f'Fuel Remaining: {row[7]:.2f} gallons\n'
-                    f'{row[6]}"\n'
+                    f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\\n'
+                    f'{start_time}\\n'
+                    f'Car type: {team.vehicle.print_name}\\n'
+                    f'Speed: {row[3]:.1f} mph\\n{heading_row}'
+                    f'Fuel Remaining: {row[7]:.2f} gallons\\n'
+                    f'{row[6]}"'
                 )
             else:
                 output += f'Icon: 0,0,{direction:3d},6,{color_code},\n'
@@ -856,12 +856,12 @@ class PlacefileSingleTeamHistoryContent(Resource):
             else:
                 color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
             output += (
-                f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\n'
-                f'{start_time}\n'
-                f'Car type: {team.vehicle.print_name}\n'
-                f'Speed: {row[3]:.1f} mph\n{heading_row}'
-                f'Fuel Remaining: {row[7]:.2f} gallons\n'
-                f'{row[6]}"\n'
+                f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\\n'
+                f'{start_time}\\n'
+                f'Car type: {team.vehicle.print_name}\\n'
+                f'Speed: {row[3]:.1f} mph\\n{heading_row}'
+                f'Fuel Remaining: {row[7]:.2f} gallons\\n'
+                f'{row[6]}"'
             )
             output += file_footertext(team.name)
             output += '\n\n'

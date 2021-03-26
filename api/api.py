@@ -190,6 +190,7 @@ class TeamList(Resource):
                 output['easter_egg'] = True
                 output['vehicle'] = vehicle_type
                 output['message'] = message
+            return output
         except Exception as exc:
             return {
                 "error": True,

@@ -25,6 +25,7 @@ from mesosim.core.config import Config
 from mesosim.core.timing import arc_time_from_cur, std_fmt
 from mesosim.core.utils import direction_angle_to_str, money_format, move_lat_lon
 from mesosim.lsr import scale_raw_lsr_to_cur_time, gr_lsr_placefile_entry_from_tuple
+import numpy as np
 
 
 # Constants

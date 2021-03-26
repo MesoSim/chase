@@ -227,8 +227,8 @@ class TeamResource(Resource):
                 speed = 0
                 direction = 0
 
-            if speed > team.current_max_speed():
-                speed = team.current_max_speed()
+            if speed > team.current_max_speed:
+                speed = team.current_max_speed
 
             # Movement Updates
             current_time = datetime.now(tz=pytz.UTC)

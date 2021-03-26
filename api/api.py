@@ -286,7 +286,7 @@ class TeamResource(Resource):
 
             # If no hazard queued, shuffle in a chance of a random hazard
             if queued_hazard is None:
-                queued_hazard = shuffle_new_hazard(team, diff_time, hazard_registry)
+                queued_hazard = shuffle_new_hazard(team, diff_time, hazard_registry, config)
 
             # Apply the queued hazard if it overrides a current hazard (otherwise ignore)
             if (

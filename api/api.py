@@ -599,13 +599,16 @@ class PlacefileAllTeamsTracksContent(Resource):
 
         for team_id in list_current_teams():
             team = get_team(team_id)
-        
-            team.cur.execute(
-                "SELECT cur_timestamp, latitude, longitude, speed, direction, status_color, "
-                "status_text, fuel_level"
-                "FROM team_history ORDER BY cur_timestamp DESC LIMIT 10"
-            )
-            history_rows = team.cur.fetchall()
+
+            try: 
+                team.cur.execute(
+                    "SELECT cur_timestamp, latitude, longitude, speed, direction, status_color, "
+                    "status_text, fuel_level"
+                    "FROM team_history ORDER BY cur_timestamp DESC LIMIT 10"
+                )
+                history_rows = team.cur.fetchall()
+            except:
+                history_rows = []
             for i, row in enumerate(history_rows):
                 start_time = row[0]
                 if i == len(history_rows) - 1:
@@ -651,12 +654,15 @@ class PlacefileAllTeamsHistoryContent(Resource):
 
             team = get_team(team_id)
 
-            team.cur.execute(
-                "SELECT cur_timestamp, latitude, longitude, speed, direction, status_color, "
-                "status_text, fuel_level"
-                "FROM team_history ORDER BY cur_timestamp"
-            )
-            history_rows = team.cur.fetchall()
+            try:
+                team.cur.execute(
+                    "SELECT cur_timestamp, latitude, longitude, speed, direction, status_color, "
+                    "status_text, fuel_level"
+                    "FROM team_history ORDER BY cur_timestamp"
+                )
+                history_rows = team.cur.fetchall()
+            except:
+                history_rows = []
             for i, row in enumerate(history_rows):
                 start_time = row[0]
                 if i == len(history_rows) - 1:
@@ -728,12 +734,16 @@ class PlacefileSingleTeamTracksContent(Resource):
 
         output = file_headertext(team.name, preface="Tracked ")
 
-        team.cur.execute(
-            "SELECT cur_timestamp, latitude, longitude, speed, direction, status_color, "
-            "status_text, fuel_level"
-            "FROM team_history ORDER BY cur_timestamp DESC LIMIT 10"
-        )
-        history_rows = team.cur.fetchall()
+        try:
+            team.cur.execute(
+                "SELECT cur_timestamp, latitude, longitude, speed, direction, status_color, "
+                "status_text, fuel_level"
+                "FROM team_history ORDER BY cur_timestamp DESC LIMIT 10"
+            )
+            history_rows = team.cur.fetchall()
+        except:
+            history_rows = []
+        
         for i, row in enumerate(history_rows):
             start_time = row[0]
             if i == len(history_rows) - 1:
@@ -777,12 +787,15 @@ class PlacefileSingleTeamHistoryContent(Resource):
 
         output = file_headertext(team.name, preface="History of ")
 
-        team.cur.execute(
-            "SELECT cur_timestamp, latitude, longitude, speed, direction, status_color, "
-            "status_text, fuel_level"
-            "FROM team_history ORDER BY cur_timestamp"
-        )
-        history_rows = team.cur.fetchall()
+        try:
+            team.cur.execute(
+                "SELECT cur_timestamp, latitude, longitude, speed, direction, status_color, "
+                "status_text, fuel_level"
+                "FROM team_history ORDER BY cur_timestamp"
+            )
+            history_rows = team.cur.fetchall()
+        except:
+            history_rows = []
         for i, row in enumerate(history_rows):
             start_time = row[0]
             if i == len(history_rows) - 1:

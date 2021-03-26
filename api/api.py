@@ -215,7 +215,7 @@ class TeamResource(Resource):
             team = get_team(team_id)
             message_list = []
 
-            if team.pin != pin:
+            if team.status['pin'] != pin:
                 return {"error": True, "error_message": "invalid pin"}, 403
 
             # Sanitize input values
@@ -313,7 +313,7 @@ class TeamLocation(Resource):
     def put(self, team_id):
         team = get_team(team_id)
 
-        if 'pin' in request.form and team.pin != request.form['pin']:
+        if 'pin' in request.form and team.status['pin'] != request.form['pin']:
             return {"error": True, "error_message": "invalid pin"}, 403
         elif 'auth' in request.form and config.get_config_value('auth') != request.form['auth']:
             return {"error": True, "error_message": "invalid auth"}, 403
@@ -341,7 +341,7 @@ class TeamVehicle(Resource):
     def put(self, team_id):
         team = get_team(team_id)
 
-        if 'pin' in request.form and team.pin != request.form['pin']:
+        if 'pin' in request.form and team.status['pin'] != request.form['pin']:
             return {"error": True, "error_message": "invalid pin"}, 403
         elif 'auth' in request.form and config.get_config_value('auth') != request.form['auth']:
             return {"error": True, "error_message": "invalid auth"}, 403
@@ -369,7 +369,7 @@ class TeamPoints(Resource):
     def put(self, team_id):
         team = get_team(team_id)
 
-        if 'pin' in request.form and team.pin != request.form['pin']:
+        if 'pin' in request.form and team.status['pin'] != request.form['pin']:
             return {"error": True, "error_message": "invalid pin"}, 403
         elif 'auth' in request.form and config.get_config_value('auth') != request.form['auth']:
             return {"error": True, "error_message": "invalid auth"}, 403
@@ -398,7 +398,7 @@ class TeamBalance(Resource):
     def put(self, team_id):
         team = get_team(team_id)
 
-        if 'pin' in request.form and team.pin != request.form['pin']:
+        if 'pin' in request.form and team.status['pin'] != request.form['pin']:
             return {"error": True, "error_message": "invalid pin"}, 403
         elif 'auth' in request.form and config.get_config_value('auth') != request.form['auth']:
             return {"error": True, "error_message": "invalid auth"}, 403
@@ -421,7 +421,7 @@ class TeamVerify(Resource):
     def put(self, team_id):
         team = get_team(team_id)
 
-        if team.pin != request.form['pin']:
+        if team.status['pin'] != request.form['pin']:
             return {"error": True, "error_message": "invalid pin"}, 403
         
         if team.vehicle is None:

@@ -323,6 +323,8 @@ class TeamLocation(Resource):
 
         team.latitude = float(request.form['lat'])
         team.longitude = float(request.form['lon'])
+        team.speed = 0
+        team.direction = 0
 
         team.write_status()
 
@@ -350,6 +352,11 @@ class TeamVehicle(Resource):
             return {"error": True, "error_message": "need authorization"}, 403
         
         team.status["vehicle"] = request.form['vehicle_type']
+
+        # Handle vehicle-specific setup
+        vehicle = Vehicle(team.status["vehicle"], config)
+        fuel_level = (1 + np.random.random()) * 0.5 * vehicle.fuel_cap
+        team.fuel_level = fuel_level
 
         team.write_status()
 

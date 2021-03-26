@@ -252,9 +252,9 @@
                     startRefuel();
                 }
                 if( data.can_refuel ){
-                    $("#refuel-button").prop(disabled, false);
+                    $("#refuel-button").prop("disabled", false);
                 } else {
-                    $("#refuel-button").prop(disabled, true);
+                    $("#refuel-button").prop("disabled", true);
                 }
                 $("#team-balance").text(data.balance);
                 if( data.balance_color && data.balance_color != "success" ){
@@ -274,14 +274,14 @@
                 $("#currentSpeed").text(data.speed);
                 selectDirectionWithoutReset($("#dir-" + data.direction));
                 if( data.direction_lock ){
-                    $(".dir-button").prop(disabled, true);
+                    $(".dir-button").prop("disabled", true);
                 } else {
-                    $(".dir-button").prop(disabled, false);
+                    $(".dir-button").prop("disabled", false);
                 }
                 if( data.can_move ){
-                    $("#speedRange").prop(readonly, false);
+                    $("#speedRange").prop("readonly", false);
                 } else {
-                    $("#speedRange").prop(readonly, true);
+                    $("#speedRange").prop("readonly", true);
                 }
 
                 if( data.messages ){

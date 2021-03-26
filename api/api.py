@@ -274,7 +274,7 @@ class TeamResource(Resource):
 
             # Check queue for action items (either instant action or a hazard to queue)
             queued_hazard = None
-            if team.has_action_queue_items():
+            if team.has_action_queue_items:
                 for action in team.get_action_queue(hazard_registry):
                     if not action.is_hazard:
                         if action.is_adjustment:

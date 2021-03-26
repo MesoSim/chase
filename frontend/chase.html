@@ -173,6 +173,13 @@
                     setSpeed(localStorage.getItem("old_speed"));
                 }
             }
+            
+            function selectDirectionWithoutReset(item) {
+                $(".dir-button").removeClass("previous-direction");
+                $(".dir-button.btn-primary.actual-dir").addClass("previous-direction");
+                $(".dir-button").removeClass("btn-primary").addClass("btn-secondary");
+                $(item).removeClass("btn-secondary").addClass("btn-primary");
+            }
 
             function setDirection(value) {
                 localStorage.setItem("direction", value);

@@ -234,11 +234,11 @@ class TeamResource(Resource):
             # Movement Updates
             current_time = datetime.now(tz=pytz.UTC)
             try:
-                diff_time = current_time - team.last_update_time
+                diff_time = (current_time - team.last_update_time).total_seconds()
             except:
                 # If this gets messed up, default to usual ping
                 diff_time = 10
-            distance = speed * config.speed_factor * diff_time.seconds / 3600
+            distance = speed * config.speed_factor * diff_time / 3600
             team.latitude, team.longitude = move_lat_lon(team.latitude, team.longitude, distance, direction)
             team.speed = speed
             team.direction = direction
@@ -251,7 +251,7 @@ class TeamResource(Resource):
                         "You have been charged " + money_format(config.aaa_fee) + " to get someone "
                         "to fill your vehicle up."
                     )
-                fuel_amt = min(diff_time.seconds * config.fill_rate,
+                fuel_amt = min(diff_time * config.fill_rate,
                             team.vehicle.fuel_cap - team.fuel_level)
                 team.fuel_level += fuel_amt
                 team.balance -= fuel_amt * config.gas_price
@@ -286,7 +286,7 @@ class TeamResource(Resource):
 
             # If no hazard queued, shuffle in a chance of a random hazard
             if queued_hazard is None:
-                queued_hazard = shuffle_new_hazard(team, diff_time.seconds, hazard_registry)
+                queued_hazard = shuffle_new_hazard(team, diff_time, hazard_registry)
 
             # Apply the queued hazard if it overrides a current hazard (otherwise ignore)
             if (

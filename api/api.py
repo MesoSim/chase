@@ -722,7 +722,7 @@ class PlacefileSingleTeamCurrentContent(Resource):
 api.add_resource(PlacefileSingleTeamCurrentContent, '/placefile/team/<team_id>/current/content')
 
 class PlacefileSingleTeamTracksContent(Resource):
-    def get(self):
+    def get(self, team_id):
         team = get_team(team_id)
 
         output = file_headertext(team.name, preface="Tracked ")
@@ -771,7 +771,7 @@ class PlacefileSingleTeamTracksContent(Resource):
 api.add_resource(PlacefileSingleTeamTracksContent, '/placefile/team/<team_id>/tracks/content')
 
 class PlacefileSingleTeamHistoryContent(Resource):
-    def get(self):
+    def get(self, team_id):
         team = get_team(team_id)
 
         output = file_headertext(team.name, preface="History of ")

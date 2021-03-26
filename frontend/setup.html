@@ -213,7 +213,7 @@
                 localStorage.setItem("pin", $("#pin").val());
 
                 $.ajax({
-                    method: "PUSH",
+                    method: "POST",
                     url: api_base + "team",
                     cache: false,
                     dataType: "json",

@@ -274,7 +274,7 @@
                 console.log(xhr.responseText);
                 var template = $("#vehicle-card-template");
 
-                for( var i = 0; i < data.vehicles.length; i++ ){
+                for( var i = data.vehicles.length - 1; i >= 0; i-- ){
                     var vehicle = data.vehicles[i];
                     var copy = template.clone().prop("id", "vehicle-card-" + vehicle.vehicle_type);
                     copy.find(".card-img").attr("src", "assets/Vehicle_Bitmaps/" + vehicle.vehicle_type + ".bmp");

@@ -698,7 +698,10 @@ api.add_resource(PlacefileAllTeamsHistoryContent, '/placefile/team/history/conte
 
 class PlacefileSingleTeamCurrentContent(Resource):
     def get(self, team_id):
-        team = get_team(team_id)
+        if team_id in list_current_teams():
+            team = get_team(team_id)
+        else:
+            return "", 404
 
         output = file_headertext(team.name, preface="Current ")
         
@@ -730,7 +733,10 @@ api.add_resource(PlacefileSingleTeamCurrentContent, '/placefile/team/<team_id>/c
 
 class PlacefileSingleTeamTracksContent(Resource):
     def get(self, team_id):
-        team = get_team(team_id)
+        if team_id in list_current_teams():
+            team = get_team(team_id)
+        else:
+            return "", 404
 
         output = file_headertext(team.name, preface="Tracked ")
 
@@ -783,7 +789,10 @@ api.add_resource(PlacefileSingleTeamTracksContent, '/placefile/team/<team_id>/tr
 
 class PlacefileSingleTeamHistoryContent(Resource):
     def get(self, team_id):
-        team = get_team(team_id)
+        if team_id in list_current_teams():
+            team = get_team(team_id)
+        else:
+            return "", 404
 
         output = file_headertext(team.name, preface="History of ")
 

@@ -233,7 +233,7 @@ class TeamResource(Resource):
             current_time = datetime.now(tz=pytz.UTC)
             diff_time = current_time - team.last_update_time
             distance = speed * config.speed_factor * diff_time.seconds / 3600
-            team.lat, team.lon = move_lat_lon(team.lat, team.lon, distance, direction)
+            team.latitude, team.longitude = move_lat_lon(team.latitude, team.longitude, distance, direction)
             team.speed = speed
             team.direction = direction
 
@@ -306,8 +306,8 @@ class TeamLocation(Resource):
     def get(self, team_id):
         team = get_team(team_id)
         return {
-            "lat": team.lat,
-            "lon": team.lon
+            "lat": team.latitude,
+            "lon": team.longitude
         }
 
     def put(self, team_id):
@@ -320,15 +320,15 @@ class TeamLocation(Resource):
         elif 'pin' not in request.form and 'auth' not in request.form:
             return {"error": True, "error_message": "need authorization"}, 403
 
-        team.lat = float(request.form['lat'])
-        team.lon = float(request.form['lon'])
+        team.latitude = float(request.form['lat'])
+        team.longitude = float(request.form['lon'])
 
         team.write_status()
 
         return {
             "success": True,
-            "lat": team.lat,
-            "lon": team.lon
+            "lat": team.latitude,
+            "lon": team.longitude
         }
 
 api.add_resource(TeamLocation, '/team/<team_id>/location')
@@ -430,7 +430,7 @@ class TeamVerify(Resource):
                 "needs_setup": True,
                 "setup_step": "vehicle-selection"
             }
-        elif team.lat is None:
+        elif team.latitude is None:
             return {
                 "team_name": team.name,
                 "needs_setup": True,
@@ -564,7 +564,7 @@ class PlacefileAllTeamsCurrentContent(Resource):
 
             team = get_team(team_id)
 
-            output += f"Object: {team.lat:.4f},{team.lon:.4f}\n"
+            output += f"Object: {team.latitude:.4f},{team.longitude:.4f}\n"
             if team.speed > 0:
                 output += f"Icon: 0,0,{team.direction:3d},2,15,\n"
                 direction = team.direction
@@ -694,7 +694,7 @@ class PlacefileSingleTeamCurrentContent(Resource):
         team = get_team(team_id)
 
         output = file_headertext(team.name, preface="Current ")
-        output += f"Object: {team.lat:.4f},{team.lon:.4f}\n"
+        output += f"Object: {team.latitude:.4f},{team.longitude:.4f}\n"
         if team.speed > 0:
             output += f"Icon: 0,0,{team.direction:3d},2,15,\n"
             direction = team.direction

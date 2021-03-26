@@ -861,7 +861,7 @@ api.add_resource(SimTimings, '/simulation/timings')
 
 class SimRunning(Resource):
     def get(self):
-        running = config.get_config_value("simulation_running")
+        running = int(config.get_config_value("simulation_running"))
 
         if running:
             return {"running": 1}

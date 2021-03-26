@@ -198,6 +198,12 @@
             }
 
             function submitStatus() {
+                if( localStorage.getItem("direction") == '' ){
+                    localStorage.setItem("direction", 0)
+                }
+                if( localStorage.getItem("is_refueling") == '' ){
+                    localStorage.setItem("is_refueling", false)
+                }
                 $.ajax({
                     method: "PUT",
                     url: api_base + "team/" + localStorage.getItem("team_id"),

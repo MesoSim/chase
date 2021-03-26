@@ -850,11 +850,11 @@ class SimTimings(Resource):
 
         for allowed_field in ('simulation_running', 'arc_start_time', 'cur_start_time', 'speed_factor'):
             if allowed_field in request.form:
-                self.cur.execute(
+                config.cur.execute(
                     "UPDATE config SET config_value = ? WHERE config_setting = ?",
                     [request.form[allowed_field], allowed_field]
                 )
-                self.con.commit()
+                config.con.commit()
         return {"success": True}
 
 api.add_resource(SimTimings, '/simulation/timings')
@@ -888,11 +888,11 @@ class SimConfig(Resource):
             'aaa_fee'
         ):
             if allowed_field in request.form:
-                self.cur.execute(
+                config.cur.execute(
                     "UPDATE config SET config_value = ? WHERE config_setting = ?",
                     [request.form[allowed_field], allowed_field]
                 )
-                self.con.commit()
+                config.con.commit()
                 updated.append(allowed_field)
         return {"success": True, "updated": updated}
 
@@ -917,11 +917,11 @@ class SimHazardConfig(Resource):
             'flooded_road_prob'
         ):
             if allowed_field in request.form:
-                self.cur.execute(
+                config.cur.execute(
                     "UPDATE hazard_config SET hazard_value = ? WHERE hazard_setting = ?",
                     [request.form[allowed_field], allowed_field]
                 )
-                self.con.commit()
+                config.con.commit()
                 updated.append(allowed_field)
         return {"success": True, "updated": updated}
 

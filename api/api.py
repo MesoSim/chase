@@ -928,7 +928,7 @@ class SimHazardConfig(Resource):
 api.add_resource(SimHazardConfig, '/simulation/hazard_config')
 
 class TestResource(Resource):
-    def get(self, vehicle_id):
+    def get(self):
         return {"test": True, "time": datetime.now().strftime(std_fmt)}
 
 api.add_resource(TestResource, '/test')

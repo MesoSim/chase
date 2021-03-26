@@ -224,6 +224,7 @@
                 console.log(xhr.responseText);
                 setGUI(data);
                 waiting = false;
+                beats_to_next_ping = 20;
             }
 
             function checkServerError(xhr, error, ex){

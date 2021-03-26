@@ -23,7 +23,7 @@ from mesosim.chase.team import Team
 from mesosim.chase.vehicle import Vehicle
 from mesosim.core.config import Config
 from mesosim.core.timing import arc_time_from_cur, std_fmt
-from mesosim.core.utils import move_lat_lon
+from mesosim.core.utils import direction_angle_to_str, money_format, move_lat_lon
 from mesosim.lsr import scale_raw_lsr_to_cur_time, gr_lsr_placefile_entry_from_tuple
 
 
@@ -75,17 +75,19 @@ def vehicle_stats(vehicle):
 
 
 # Recreate the file header and footer texts for use in placefiles.
-def file_headertext(team_name):
-    return 'RefreshSeconds: 10\
-            \nThreshold: 999\
-            \nTitle: Location of Team %s\
-            \nFont: 1, 11, 0, "Courier New"\
-            \nIconFile: 1, 22, 22, 11, 11, "http://www.spotternetwork.org/icon/spotternet.png"\
-            \nIconFile: 2, 15, 25,  8, 25, "http://www.spotternetwork.org/icon/arrows.png"\
-            \nIconFile: 3, 22, 22, 11, 11, "http://www.spotternetwork.org/icon/sn_reports.png"\
-            \nIconFile: 4, 22, 22, 11, 11, "http://www.spotternetwork.org/icon/sn_reports_30.png"\
-            \nIconFile: 5, 22, 22, 11, 11, "http://www.spotternetwork.org/icon/sn_reports_60.png"\
-            \nIconFile: 6, 22, 22, 11, 11, "http://www.spotternetwork.org/icon/spotternet_new.png"\n' % (team_name,)
+def file_headertext(team_name_str, preface=""):
+    return (
+        'RefreshSeconds: 10'
+        '\nThreshold: 999'
+        f'\nTitle: {preface}Location of {team_name_str}'
+        '\nFont: 1, 11, 0, "Courier New"'
+        '\nIconFile: 1, 22, 22, 11, 11, "http://www.spotternetwork.org/icon/spotternet.png"'
+        '\nIconFile: 2, 15, 25,  8, 25, "http://www.spotternetwork.org/icon/arrows.png"'
+        '\nIconFile: 3, 22, 22, 11, 11, "http://www.spotternetwork.org/icon/sn_reports.png"'
+        '\nIconFile: 4, 22, 22, 11, 11, "http://www.spotternetwork.org/icon/sn_reports_30.png"'
+        '\nIconFile: 5, 22, 22, 11, 11, "http://www.spotternetwork.org/icon/sn_reports_60.png"'
+        '\nIconFile: 6, 22, 22, 11, 11, "http://www.spotternetwork.org/icon/spotternet_new.png"\n\n'
+    )
 
 def file_footertext(team_name):
     return '\nText: 15, 10, 1, "%s"\nEnd:\n' % (team_name,)
@@ -93,27 +95,28 @@ def file_footertext(team_name):
 def file_footerend():
     return '\nEnd:\n'
 
+def list_current_teams():
+    return [
+        team_db_name[:-3] for team_db_name in os.listdir(team_db_dir)
+        if team_db_name[-3:] == ".db"
+    ]
+
 #########
 # Teams #
 #########
 
 class TeamList(Resource):
-    def list_current_teams(self):
-        return [
-            team_db_name[:-3] for team_db_name in os.listdir(team_db_dir)
-            if team_db_name[-3:] == ".db"
-        ]
 
     def get(self):
         return {
-            "teams": self.list_current_teams() 
+            "teams": list_current_teams() 
         }
 
     def push(self):
         team_id = request.form['team_id']
         team_name = request.form['team_name']
         pin = request.form['pin']
-        if team_id in self.list_current_teams():
+        if team_id in list_current_teams():
             # ERROR: Team exists already
             return {
                 "error": True,
@@ -231,7 +234,6 @@ class TeamResource(Resource):
             # Gas management
             if refuel:
                 if team.fuel_level <= 0:
-                    # TODO this is broken, need to add a flag instead
                     team.balance -= config.aaa_fee
                     message_list.append(
                         "You have been charged " + money_format(config.aaa_fee) + " to get someone "
@@ -305,8 +307,12 @@ class TeamLocation(Resource):
     def put(self, team_id):
         team = get_team(team_id)
 
-        if team.pin != request.form['pin']:
+        if 'pin' in request.form and team.pin != request.form['pin']:
             return {"error": True, "error_message": "invalid pin"}, 403
+        elif 'auth' in request.form and config.get_config_value('auth') != request.form['auth']:
+            return {"error": True, "error_message": "invalid auth"}, 403
+        elif 'pin' not in request.form and 'auth' not in request.form:
+            return {"error": True, "error_message": "need authorization"}, 403
 
         team.lat = float(request.form['lat'])
         team.lon = float(request.form['lon'])
@@ -329,8 +335,12 @@ class TeamVehicle(Resource):
     def put(self, team_id):
         team = get_team(team_id)
 
-        if team.pin != request.form['pin']:
+        if 'pin' in request.form and team.pin != request.form['pin']:
             return {"error": True, "error_message": "invalid pin"}, 403
+        elif 'auth' in request.form and config.get_config_value('auth') != request.form['auth']:
+            return {"error": True, "error_message": "invalid auth"}, 403
+        elif 'pin' not in request.form and 'auth' not in request.form:
+            return {"error": True, "error_message": "need authorization"}, 403
         
         team.status["vehicle"] = request.form['vehicle_type']
 
@@ -343,13 +353,63 @@ class TeamVehicle(Resource):
 
 api.add_resource(TeamVehicle, '/team/<team_id>/vehicle')
 
-# TODO
-# class TeamPoints(Resource):
-# api.add_resource(TeamPoints, '/team/<team_id>/points')
+class TeamPoints(Resource):
+    def get(self, team_id):
+        team = get_team(team_id)
+        return {
+            "points": team.points
+        }
 
-# TODO
-# class TeamBalance(Resource):
-# api.add_resource(TeamBalance, '/team/<team_id>/balance')
+    def put(self, team_id):
+        team = get_team(team_id)
+
+        if 'pin' in request.form and team.pin != request.form['pin']:
+            return {"error": True, "error_message": "invalid pin"}, 403
+        elif 'auth' in request.form and config.get_config_value('auth') != request.form['auth']:
+            return {"error": True, "error_message": "invalid auth"}, 403
+        elif 'pin' not in request.form and 'auth' not in request.form:
+            return {"error": True, "error_message": "need authorization"}, 403
+
+        team.points += int(request.form['points'])
+
+        team.write_status()
+
+        return {
+            "success": True,
+            "points": team.points
+        }
+
+api.add_resource(TeamLocation, '/team/<team_id>/points')
+
+class TeamBalance(Resource):
+    def get(self, team_id):
+        team = get_team(team_id)
+        return {
+            "balance": team.balance,
+            "money_formatted": money_format(team.balance)
+        }
+
+    def put(self, team_id):
+        team = get_team(team_id)
+
+        if 'pin' in request.form and team.pin != request.form['pin']:
+            return {"error": True, "error_message": "invalid pin"}, 403
+        elif 'auth' in request.form and config.get_config_value('auth') != request.form['auth']:
+            return {"error": True, "error_message": "invalid auth"}, 403
+        elif 'pin' not in request.form and 'auth' not in request.form:
+            return {"error": True, "error_message": "need authorization"}, 403
+
+        team.balance += float(request.form['balance'])
+
+        team.write_status()
+
+        return {
+            "success": True,
+            "balance": team.balance,
+            "money_formatted": money_format(team.balance)
+        }
+
+api.add_resource(TeamLocation, '/team/<team_id>/location')
 
 class TeamVerify(Resource):
     def put(self, team_id):
@@ -418,7 +478,8 @@ class PlacefileLsrContent(Resource):
         for lsr_tuple in lsrs_scaled:
             output += gr_lsr_placefile_entry_from_tuple(
                 lsr_tuple,
-                wrap_length=remark_wrap_length
+                wrap_length=remark_wrap_length,
+                tz=pytz.timezone(config.get_config_value("pytz_timezone"))
             ) + '\n'
         
         response = make_response(output)
@@ -490,20 +551,132 @@ api.add_resource(PlacefileLsrLoad, '/placefile/lsr/load')
 
 class PlacefileAllTeamsCurrentContent(Resource):
     def get(self):
-        # TODO
-        output = "LSR CONTENT HERE"
+        
+        output = file_headertext("All Teams", preface="Current ")
+
+        for team_id in list_current_teams():
+
+            team = get_team(team_id)
+
+            output += f"Object: {team.lat:.4f},{team.lon:.4f}\n"
+            if team.speed > 0:
+                output += f"Icon: 0,0,{team.direction:3d},2,15,\n"
+                direction = team.direction
+                heading_row = f"Heading: {direction_angle_to_str(team.direction)}\n"
+            else:
+                direction = 0
+                heading_row = ""
+            color_code = {"green": 2, "yellow": 6, "red": 10}[team.status_color]
+            output += (
+                f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\n'
+                f'{team.last_update.strftime("%Y-%m-%d %H:%M:%S")} UTC\n'
+                f'Car type: {team.vehicle.print_name}\n'
+                f'Speed: {team.speed:.1f} mph\n{heading_row}'
+                f'Fuel Remaining: {team.fuel_level:.2f} gallons\n'
+                f'{team.status_text}"\n'
+            )
+            output += file_footerend()
+            output += "\n\n"
+
         response = make_response(output)
         response.headers['content-type'] = 'text/plain'
         return response
 
 api.add_resource(PlacefileAllTeamsCurrentContent, '/placefile/team/current/content')
 
-# TODO PlacefileAllTeamsTracksContent
+class PlacefileAllTeamsTracksContent(Resource):
+    def get(self):
+
+        output = file_headertext("All Teams", preface="Tracked ")
+
+        for team_id in list_current_teams():
+            team = get_team(team_id)
+        
+            team.cur.execute(
+                "SELECT cur_timestamp, latitude, longitude, speed, direction, status_color, "
+                "status_text, fuel_level"
+                "FROM team_history ORDER BY cur_timestamp DESC LIMIT 10"
+            )
+            history_rows = team.cur.fetchall()
+            for i, row in enumerate(history_rows):
+                start_time = row[0]
+                if i == len(history_rows) - 1:
+                    end_time = (datetime.now(tz=pytz.UTC) + timedelta(seconds=30)).strftime(std_fmt)
+                    arrow_icon = f"Icon: 0,0,{row[4]:3d},2,15,\n"
+                else:
+                    end_time = history_rows[i + 1][0]
+                    arrow_icon = ""
+                output += f"TimeRange: {start_time} {end_time}\n"
+                output += f"Object: {row[1]:.4f},{row[2]:.4f}\n"
+                if row[3] > 0:
+                    output += arrow_icon
+                    direction = row[4]
+                    heading_row = f"Heading: {direction_angle_to_str(row[4])}\n"
+                else:
+                    direction = 0
+                    heading_row = ""
+                color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
+                if arrow_icon:
+                    output += (
+                        f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\n'
+                        f'{start_time}\n'
+                        f'Car type: {team.vehicle.print_name}\n'
+                        f'Speed: {row[3]:.1f} mph\n{heading_row}'
+                        f'Fuel Remaining: {row[7]:.2f} gallons\n'
+                        f'{row[6]}"\n'
+                    )
+                else:
+                    output += f'Icon: 0,0,{direction:3d},6,{color_code},\n'
+                output += file_footertext(team.name)
+                output += '\n\n'
+
+        response = make_response(output)
+        response.headers['content-type'] = 'text/plain'
+        return response
+
+api.add_resource(PlacefileAllTeamsTracksContent, '/placefile/team/tracks/content')
 
 class PlacefileAllTeamsHistoryContent(Resource):
     def get(self):
-        # TODO
-        output = "LSR CONTENT HERE"
+        output = file_headertext("All Teams", preface="History of ")
+
+        for team_id in list_current_teams():
+
+            team = get_team(team_id)
+
+            team.cur.execute(
+                "SELECT cur_timestamp, latitude, longitude, speed, direction, status_color, "
+                "status_text, fuel_level"
+                "FROM team_history ORDER BY cur_timestamp"
+            )
+            history_rows = team.cur.fetchall()
+            for i, row in enumerate(history_rows):
+                start_time = row[0]
+                if i == len(history_rows) - 1:
+                    end_time = (datetime.now(tz=pytz.UTC) + timedelta(seconds=30)).strftime(std_fmt)
+                else:
+                    end_time = history_rows[i + 1][0]
+                output += f"TimeRange: {start_time} {end_time}\n"
+                output += f"Object: {row[1]:.4f},{row[2]:.4f}\n"
+                if row[3] > 0:
+                    output += f"Icon: 0,0,{row[4]:3d},2,15,\n"
+                    direction = row[4]
+                    heading_row = f"Heading: {direction_angle_to_str(row[4])}\n"
+                else:
+                    direction = 0
+                    heading_row = ""
+                color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
+                output += (
+                    f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\n'
+                    f'{start_time}\n'
+                    f'Car type: {team.vehicle.print_name}\n'
+                    f'Speed: {row[3]:.1f} mph\n{heading_row}'
+                    f'Fuel Remaining: {row[7]:.2f} gallons\n'
+                    f'{row[6]}"\n'
+                )
+                output += file_footertext(team.name)
+                output += '\n\n'
+        
         response = make_response(output)
         response.headers['content-type'] = 'text/plain'
         return response
@@ -512,20 +685,123 @@ api.add_resource(PlacefileAllTeamsHistoryContent, '/placefile/team/history/conte
 
 class PlacefileSingleTeamCurrentContent(Resource):
     def get(self, team_id):
-        # TODO
-        output = "LSR CONTENT HERE"
+        team = get_team(team_id)
+
+        output = file_headertext(team.name, preface="Current ")
+        output += f"Object: {team.lat:.4f},{team.lon:.4f}\n"
+        if team.speed > 0:
+            output += f"Icon: 0,0,{team.direction:3d},2,15,\n"
+            direction = team.direction
+            heading_row = f"Heading: {direction_angle_to_str(team.direction)}\n"
+        else:
+            direction = 0
+            heading_row = ""
+        color_code = {"green": 2, "yellow": 6, "red": 10}[team.status_color]
+        output += (
+            f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\n'
+            f'{team.last_update.strftime("%Y-%m-%d %H:%M:%S")} UTC\n'
+            f'Car type: {team.vehicle.print_name}\n'
+            f'Speed: {team.speed:.1f} mph\n{heading_row}'
+            f'Fuel Remaining: {team.fuel_level:.2f} gallons\n'
+            f'{team.status_text}"\n'
+        )
+        output += file_footertext(team.name)
+
         response = make_response(output)
         response.headers['content-type'] = 'text/plain'
         return response
 
 api.add_resource(PlacefileSingleTeamCurrentContent, '/placefile/team/<team_id>/current/content')
 
-# TODO PlacefileSingleTeamTracksContent
+class PlacefileSingleTeamTracksContent(Resource):
+    def get(self):
+        team = get_team(team_id)
+
+        output = file_headertext(team.name, preface="Tracked ")
+
+        team.cur.execute(
+            "SELECT cur_timestamp, latitude, longitude, speed, direction, status_color, "
+            "status_text, fuel_level"
+            "FROM team_history ORDER BY cur_timestamp DESC LIMIT 10"
+        )
+        history_rows = team.cur.fetchall()
+        for i, row in enumerate(history_rows):
+            start_time = row[0]
+            if i == len(history_rows) - 1:
+                end_time = (datetime.now(tz=pytz.UTC) + timedelta(seconds=30)).strftime(std_fmt)
+                arrow_icon = f"Icon: 0,0,{row[4]:3d},2,15,\n"
+            else:
+                end_time = history_rows[i + 1][0]
+                arrow_icon = ""
+            output += f"TimeRange: {start_time} {end_time}\n"
+            output += f"Object: {row[1]:.4f},{row[2]:.4f}\n"
+            if row[3] > 0:
+                output += arrow_icon
+                direction = row[4]
+                heading_row = f"Heading: {direction_angle_to_str(row[4])}\n"
+            else:
+                direction = 0
+                heading_row = ""
+            color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
+            if arrow_icon:
+                output += (
+                    f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\n'
+                    f'{start_time}\n'
+                    f'Car type: {team.vehicle.print_name}\n'
+                    f'Speed: {row[3]:.1f} mph\n{heading_row}'
+                    f'Fuel Remaining: {row[7]:.2f} gallons\n'
+                    f'{row[6]}"\n'
+                )
+            else:
+                output += f'Icon: 0,0,{direction:3d},6,{color_code},\n'
+            output += file_footertext(team.name)
+            output += '\n\n'
+
+        response = make_response(output)
+        response.headers['content-type'] = 'text/plain'
+        return response
+
+api.add_resource(PlacefileSingleTeamTracksContent, '/placefile/team/<team_id>/tracks/content')
 
 class PlacefileSingleTeamHistoryContent(Resource):
     def get(self):
-        # TODO
-        output = "LSR CONTENT HERE"
+        team = get_team(team_id)
+
+        output = file_headertext(team.name, preface="History of ")
+
+        team.cur.execute(
+            "SELECT cur_timestamp, latitude, longitude, speed, direction, status_color, "
+            "status_text, fuel_level"
+            "FROM team_history ORDER BY cur_timestamp"
+        )
+        history_rows = team.cur.fetchall()
+        for i, row in enumerate(history_rows):
+            start_time = row[0]
+            if i == len(history_rows) - 1:
+                end_time = (datetime.now(tz=pytz.UTC) + timedelta(seconds=30)).strftime(std_fmt)
+            else:
+                end_time = history_rows[i + 1][0]
+            output += f"TimeRange: {start_time} {end_time}\n"
+            output += f"Object: {row[1]:.4f},{row[2]:.4f}\n"
+            if row[3] > 0:
+                output += f"Icon: 0,0,{row[4]:3d},2,15,\n"
+                direction = row[4]
+                heading_row = f"Heading: {direction_angle_to_str(row[4])}\n"
+            else:
+                direction = 0
+                heading_row = ""
+            color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
+            output += (
+                f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\n'
+                f'{start_time}\n'
+                f'Car type: {team.vehicle.print_name}\n'
+                f'Speed: {row[3]:.1f} mph\n{heading_row}'
+                f'Fuel Remaining: {row[7]:.2f} gallons\n'
+                f'{row[6]}"\n'
+            )
+            output += file_footertext(team.name)
+            output += '\n\n'
+
         response = make_response(output)
         response.headers['content-type'] = 'text/plain'
         return response
@@ -595,20 +871,57 @@ class SimConfig(Resource):
         if config.get_config_value('auth') != request.form['auth']:
             return {"error": True, "error_message": "invalid auth"}, 403
 
-        for allowed_field in ('simulation_running',):
+        updated = []
+        for allowed_field in (
+            'simulation_running',
+            'gas_price',
+            'fill_rate',
+            'min_town_distance_search',
+            'min_town_distance_refuel',
+            'min_town_population',
+            'speed_limit',
+            'lsr_hours_valid',
+            'aaa_fee'
+        ):
             if allowed_field in request.form:
                 self.cur.execute(
                     "UPDATE config SET config_value = ? WHERE config_setting = ?",
                     [request.form[allowed_field], allowed_field]
                 )
                 self.con.commit()
-        return {"success": True}
+                updated.append(allowed_field)
+        return {"success": True, "updated": updated}
 
 api.add_resource(SimConfig, '/simulation/config')
 
-# TODO
-# class SimHazardConfig(Resource):
-# api.add_resource(SimHazardConfig, '/simulation/hazard_config')
+class SimHazardConfig(Resource):
+    def put(self):
+        if config.get_config_value('auth') != request.form['auth']:
+            return {"error": True, "error_message": "invalid auth"}, 403
+
+        updated = []
+        for allowed_field in (
+            'active_hazards',
+            'speeding_max_chance',
+            'speeding_ticket_amt',
+            'dirt_road_prob',
+            'cc_prob',
+            'flat_tire_prob',
+            'pay_for_flat_prob',
+            'pay_for_flat_amt',
+            'dead_end_prob',
+            'flooded_road_prob'
+        ):
+            if allowed_field in request.form:
+                self.cur.execute(
+                    "UPDATE hazard_config SET hazard_value = ? WHERE hazard_setting = ?",
+                    [request.form[allowed_field], allowed_field]
+                )
+                self.con.commit()
+                updated.append(allowed_field)
+        return {"success": True, "updated": updated}
+
+api.add_resource(SimConfig, '/simulation/hazard_config')
 
 ##########################
 

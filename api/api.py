@@ -590,7 +590,10 @@ class PlacefileAllTeamsCurrentContent(Resource):
                 else:
                     direction = 0
                     heading_row = ""
-                color_code = {"green": 2, "yellow": 6, "red": 10}[team.status_color]
+                if team.status_color is None:
+                    color_code = 2
+                else:
+                    color_code = {"green": 2, "yellow": 6, "red": 10}[team.status_color]
                 output += (
                     f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\n'
                     f'{team.last_update.strftime("%Y-%m-%d %H:%M:%S")} UTC\n'
@@ -641,7 +644,10 @@ class PlacefileAllTeamsTracksContent(Resource):
                 else:
                     direction = 0
                     heading_row = ""
-                color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
+                if row[5] is None:
+                    color_code = 2
+                else:
+                    color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
                 if arrow_icon:
                     output += (
                         f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\n'
@@ -694,7 +700,10 @@ class PlacefileAllTeamsHistoryContent(Resource):
                 else:
                     direction = 0
                     heading_row = ""
-                color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
+                if row[5] is None:
+                    color_code = 2
+                else:
+                    color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
                 output += (
                     f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\n'
                     f'{start_time}\n'
@@ -730,7 +739,10 @@ class PlacefileSingleTeamCurrentContent(Resource):
             else:
                 direction = 0
                 heading_row = ""
-            color_code = {"green": 2, "yellow": 6, "red": 10}[team.status_color]
+            if team.status_color:
+                color_code = 2
+            else:
+                color_code = {"green": 2, "yellow": 6, "red": 10}[team.status_color]
             output += (
                 f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\n'
                 f'{team.last_update.strftime("%Y-%m-%d %H:%M:%S")} UTC\n'
@@ -782,7 +794,10 @@ class PlacefileSingleTeamTracksContent(Resource):
             else:
                 direction = 0
                 heading_row = ""
-            color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
+            if row[5] is None:
+                color_code = 2
+            else:
+                color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
             if arrow_icon:
                 output += (
                     f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\n'
@@ -836,7 +851,10 @@ class PlacefileSingleTeamHistoryContent(Resource):
             else:
                 direction = 0
                 heading_row = ""
-            color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
+            if row[5] is None:
+                color_code = 2
+            else:
+                color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
             output += (
                 f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\n'
                 f'{start_time}\n'

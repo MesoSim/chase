@@ -823,9 +823,9 @@ api.add_resource(PlacefileSingleTeamHistoryContent, '/placefile/team/<team_id>/h
 class VehicleList(Resource):
     def get(self):
         config.cur.execute("SELECT vehicle_type FROM vehicles WHERE shown_in_list = 1")
-        return [
+        return {'vehicles': [
             vehicle_stats(get_vehicle(r[0])) for r in config.cur.fetchall()
-        ]
+        ]}
 
 api.add_resource(VehicleList, '/vehicle')
 

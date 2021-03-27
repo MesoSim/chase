@@ -582,7 +582,10 @@ class PlacefileAllTeamsCurrentContent(Resource):
 
         for team_id in list_current_teams():
 
-            team = get_team(team_id)
+            try:
+                team = get_team(team_id)
+            except:
+                continue
 
             if team.latitude is not None and team.speed is not None:
                 output += f"Object: {team.latitude:.4f},{team.longitude:.4f}\n"
@@ -620,7 +623,10 @@ class PlacefileAllTeamsTracksContent(Resource):
         output = file_headertext("All Teams", preface="Tracked ")
 
         for team_id in list_current_teams():
-            team = get_team(team_id)
+            try:
+                team = get_team(team_id)
+            except:
+                continue
 
             try: 
                 team.cur.execute(
@@ -677,7 +683,10 @@ class PlacefileAllTeamsHistoryContent(Resource):
 
         for team_id in list_current_teams():
 
-            team = get_team(team_id)
+            try:
+                team = get_team(team_id)
+            except:
+                continue
 
             try:
                 team.cur.execute(
@@ -703,10 +712,10 @@ class PlacefileAllTeamsHistoryContent(Resource):
                 else:
                     direction = 0
                     heading_row = ""
-                if row[5] is None:
-                    color_code = 2
-                else:
+                try:
                     color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
+                except:
+                    color_code = 2
                 output += (
                     f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\\n'
                     f'{start_time}\\n'

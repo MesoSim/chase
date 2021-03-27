@@ -211,7 +211,10 @@ class TeamResource(Resource):
         try:
             pin = request.form['pin']
             speed = float(request.form['speed'])
-            direction = float(request.form['direction'])
+            try:
+                direction = float(request.form['direction'])
+            except:
+                direction = 0
             refuel = bool(request.form['refuel'])
 
             team = get_team(team_id)

@@ -751,7 +751,7 @@ class PlacefileSingleTeamCurrentContent(Resource):
             else:
                 direction = 0
                 heading_row = ""
-            if team.status_color:
+            if team.status_color is None:
                 color_code = 2
             else:
                 color_code = {"green": 2, "yellow": 6, "red": 10}[team.status_color]

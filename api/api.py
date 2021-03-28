@@ -276,7 +276,7 @@ class TeamResource(Resource):
             if len(ongoing_hazards) > 0:
                 team.active_hazards = ongoing_hazards
             else:
-                team.clear_active_hazard()
+                team.clear_active_hazards()
 
             # Check queue for action items (either instant action or a hazard to queue)
             queued_hazard = None

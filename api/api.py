@@ -16,6 +16,7 @@ import os
 import pytz
 from sqlite3 import dbapi2 as sql
 import traceback
+import warnings
 
 from flask import Flask, request, make_response
 from flask_restful import Resource, Api
@@ -209,16 +210,19 @@ class TeamResource(Resource):
         # (this is the chase.py replacement)
         # OUTPUT: team.output_status_dict() combined with messages
         try:
+            triggers = []
             pin = request.form['pin']
             speed = float(request.form['speed'])
             try:
                 direction = float(request.form['direction'])
             except:
                 direction = 0
+                triggers.append("direction set to 0 from input")
             try:
-                refuel = request.form['refuel'] == "false" or bool(request.form['refuel'])
+                refuel = (request.form['refuel'] == "true")
+                triggers.append("refueling!")
             except:
-                refuel = false
+                refuel = False
 
             team = get_team(team_id)
             message_list = []
@@ -229,13 +233,15 @@ class TeamResource(Resource):
             # Sanitize input values
             if team.cannot_refuel:
                 refuel = False
+                triggers.append("cannot refuel")
 
             if refuel or speed <= 0 or team.stopped or team.fuel_level <= 0:
                 speed = 0
-                direction = 0
+                triggers.append("set speed to 0 since stopped")
 
             if speed > team.current_max_speed:
                 speed = team.current_max_speed
+                triggers.append("speed was above max...limiting")
 
             # Movement Updates
             current_time = datetime.now(tz=pytz.UTC)
@@ -244,6 +250,7 @@ class TeamResource(Resource):
             except:
                 # If this gets messed up, default to usual ping
                 diff_time = 10
+                triggers.append("diff time could not be computed normally")
             distance = speed * config.speed_factor * diff_time / 3600
             team.latitude, team.longitude = move_lat_lon(team.latitude, team.longitude, distance, direction)
             team.speed = speed
@@ -262,6 +269,7 @@ class TeamResource(Resource):
                 team.fuel_level += fuel_amt
                 team.balance -= fuel_amt * config.gas_price
                 done_refueling = (team.fuel_level >= team.vehicle.fuel_cap - .01)
+                triggers.append("finished refueling")
             else:
                 fuel_amt = distance / team.vehicle.calculate_mpg(speed)
                 team.fuel_level -= fuel_amt * float(config.get_config_value("fuel_factor"))
@@ -278,8 +286,10 @@ class TeamResource(Resource):
                 message_list.append(haz.generate_expiry_message())
             if len(ongoing_hazards) > 0:
                 team.active_hazards = ongoing_hazards
+                triggers.append("hazards remain")
             else:
                 team.clear_active_hazards()
+                triggers.append("no hazards remain")
 
             # Check queue for action items (either instant action or a hazard to queue)
             queued_hazard = None
@@ -290,12 +300,16 @@ class TeamResource(Resource):
                             team.apply_action(action)
                         message_list.append(action.generate_message())
                         team.dismiss_action(action)
+                        triggers.append("non hazard action applied")
                     elif action.is_hazard and queued_hazard is None:
                         queued_hazard = action
+                        triggers.append("hazard in queue is queued")
 
             # If no hazard queued, shuffle in a chance of a random hazard
             if queued_hazard is None:
                 queued_hazard = shuffle_new_hazard(team, diff_time, hazard_registry, config)
+                if queued_hazard is not None:
+                    triggers.append("draw of the dice pulled up a hazard!")
 
             # Apply the queued hazard if it overrides a current hazard (otherwise ignore)
             if (
@@ -305,12 +319,14 @@ class TeamResource(Resource):
                 team.apply_hazard(queued_hazard)  # actually make it take effect
                 message_list.append(queued_hazard.generate_message())
                 team.dismiss_action(queued_hazard)  # in case it was from DB
+                triggers.append("we applied a hazard")
 
             team.write_status()
 
             output = team.output_status_dict()
             output['messages'] = message_list
             output['debug'] = {key: request.form[key] for key in ("pin", "speed", "direction", "refuel")}
+            output['debug']['triggers'] = triggers
 
             return output
         except Exception as exc:

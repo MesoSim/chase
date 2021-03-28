@@ -215,7 +215,10 @@ class TeamResource(Resource):
                 direction = float(request.form['direction'])
             except:
                 direction = 0
-            refuel = bool(request.form['refuel'])
+            try:
+                refuel = request.form['refuel'] == "false" or bool(request.form['refuel'])
+            except:
+                refuel = false
 
             team = get_team(team_id)
             message_list = []

@@ -261,7 +261,7 @@ class TeamResource(Resource):
                 done_refueling = (team.fuel_level >= team.vehicle.fuel_cap - .01)
             else:
                 fuel_amt = distance / team.vehicle.calculate_mpg(speed)
-                team.fuel_level -= fuel_amt * config.get_config_value("fuel_factor")
+                team.fuel_level -= fuel_amt * float(config.get_config_value("fuel_factor"))
                 if team.fuel_level < 0:
                     team.fuel_level = 0
                     message_list.append(datetime.now(tz=pytz.UTC).strftime('%H%MZ') +

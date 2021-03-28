@@ -268,16 +268,19 @@ class TeamResource(Resource):
                                         ': You are running on fumes! Better call for help.')
 
             # Current hazard/hazard expiry
-            if (
-                team.active_hazard is not None
-                and team.active_hazard.expiry_time <= datetime.now(tz=pytz.UTC)
-            ):
-                message_list.append(team.active_hazard.generate_expiry_message())
+            # Need to partition into ongoing and expired
+            ongoing_hazards = [haz for haz in team.active_hazards if haz.expiry_time > datetime.now(tz=pytz.UTC)]
+            expired_hazards = [haz for haz in team.active_hazards if haz.expiry_time <= datetime.now(tz=pytz.UTC)]
+            for haz in expired_hazards:
+                message_list.append(haz.generate_expiry_message())
+            if len(ongoing_hazards) > 0:
+                team.active_hazards = ongoing_hazards
+            else:
                 team.clear_active_hazard()
 
             # Check queue for action items (either instant action or a hazard to queue)
             queued_hazard = None
-            if team.has_action_queue_items:
+            if team.has_action_queue_item:
                 for action in team.get_action_queue(hazard_registry):
                     if not action.is_hazard:
                         if action.is_adjustment:
@@ -294,7 +297,7 @@ class TeamResource(Resource):
             # Apply the queued hazard if it overrides a current hazard (otherwise ignore)
             if (
                 queued_hazard is not None
-                and (team.active_hazard is None or team.active_hazard.overridden_by(queued_hazard))
+                and all(haz.overridden_by(queued_hazard) for haz in team.active_hazards)
             ):
                 team.apply_hazard(queued_hazard)  # actually make it take effect
                 message_list.append(queued_hazard.generate_message())

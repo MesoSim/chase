@@ -310,6 +310,7 @@ class TeamResource(Resource):
 
             output = team.output_status_dict()
             output['messages'] = message_list
+            output['debug'] = {key: request.form[key] for key in ("pin", "speed", "direction", "refuel")}
 
             return output
         except Exception as exc:

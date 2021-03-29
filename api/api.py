@@ -647,7 +647,7 @@ class PlacefileAllTeamsTracksContent(Resource):
             try: 
                 team.cur.execute(
                     "SELECT cur_timestamp, latitude, longitude, speed, direction, status_color, "
-                    "status_text, fuel_level"
+                    "status_text, fuel_level "
                     "FROM team_history ORDER BY cur_timestamp DESC LIMIT 10"
                 )
                 history_rows = team.cur.fetchall()
@@ -707,7 +707,7 @@ class PlacefileAllTeamsHistoryContent(Resource):
             try:
                 team.cur.execute(
                     "SELECT cur_timestamp, latitude, longitude, speed, direction, status_color, "
-                    "status_text, fuel_level"
+                    "status_text, fuel_level "
                     "FROM team_history ORDER BY cur_timestamp"
                 )
                 history_rows = team.cur.fetchall()
@@ -799,7 +799,7 @@ class PlacefileSingleTeamTracksContent(Resource):
         try:
             team.cur.execute(
                 "SELECT cur_timestamp, latitude, longitude, speed, direction, status_color, "
-                "status_text, fuel_level"
+                "status_text, fuel_level "
                 "FROM team_history ORDER BY cur_timestamp DESC LIMIT 10"
             )
             history_rows = team.cur.fetchall()
@@ -858,7 +858,7 @@ class PlacefileSingleTeamHistoryContent(Resource):
         try:
             team.cur.execute(
                 "SELECT cur_timestamp, latitude, longitude, speed, direction, status_color, "
-                "status_text, fuel_level"
+                "status_text, fuel_level "
                 "FROM team_history ORDER BY cur_timestamp"
             )
             history_rows = team.cur.fetchall()

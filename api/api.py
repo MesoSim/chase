@@ -406,9 +406,9 @@ class TeamPoints(Resource):
             return {"error": True, "error_message": "need authorization"}, 403
 
         try:
-            team.points += int(request.form['points'])
+            team.points += int(float(request.form['points']))
         except:
-            team.points = int(request.form['points'])
+            team.points = int(float(request.form['points']))
 
         team.write_status()
 
@@ -522,6 +522,7 @@ class PlacefileLsrContent(Resource):
                 ) + '\n'
         except:
             # Just have the header matter if errors
+            warnings.warn(traceback.format_exc())
             pass
         
         response = make_response(output)

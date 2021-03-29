@@ -42,15 +42,20 @@ team_db_dir = '/home/jthielen/teams/'
 lsr_asset_url = 'https://chase.iawx.info/assets/'
 
 config = Config(main_db_file)
-hazard_registry = create_hazard_registry(config)
 
 # Shared
-def get_team(team_id):
+def get_team_and_hazard_registry(team_id):
+    hazard_registry = create_hazard_registry(config)
     return Team(
         team_db_dir + team_id + '.db',
         hazard_registry=hazard_registry,
         config=config
-    )
+    ), hazard_registry
+
+
+def get_team(team_id):
+    team, _ = get_team_and_hazard_registry(team_id)
+    return team
 
 
 def get_vehicle(vehicle_id):
@@ -229,7 +234,7 @@ class TeamResource(Resource):
                 refuel = False
                 triggers.append("not refueling")
 
-            team = get_team(team_id)
+            team, hazard_registry = get_team_and_hazard_registry(team_id)
             message_list = []
 
             if team.status['pin'] != pin:

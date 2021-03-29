@@ -656,11 +656,11 @@ class PlacefileAllTeamsTracksContent(Resource):
             for i, row in enumerate(history_rows):
                 try:
                     start_time = row[0]
-                    if i == len(history_rows) - 1:
+                    if i == 0:
                         end_time = (datetime.now(tz=pytz.UTC) + timedelta(seconds=30)).strftime(std_fmt)
                         arrow_icon = f"Icon: 0,0,{row[4]:03d},2,15,\n"
                     else:
-                        end_time = history_rows[i + 1][0]
+                        end_time = history_rows[i - 1][0]
                         arrow_icon = ""
                     this_output = f"Object: {row[1]:.4f},{row[2]:.4f}\n"
                     if row[3] > 0:
@@ -683,9 +683,10 @@ class PlacefileAllTeamsTracksContent(Resource):
                             f'Fuel Remaining: {row[7]:.2f} gallons\\n'
                             f'{row[6]}"'
                         )
+                        this_output += file_footertext(team.name)
                     else:
                         this_output += f'Icon: 0,0,{direction:03d},6,{color_code},\n'
-                    this_output += file_footertext(team.name)
+                        this_output += file_footerend()
                     this_output += '\n\n'
                     output += this_output
                 except:
@@ -712,7 +713,7 @@ class PlacefileAllTeamsHistoryContent(Resource):
                 team.cur.execute(
                     "SELECT cur_timestamp, latitude, longitude, speed, direction, status_color, "
                     "status_text, fuel_level "
-                    "FROM team_history ORDER BY cur_timestamp"
+                    "FROM team_history ORDER BY cur_timestamp DESC"
                 )
                 history_rows = team.cur.fetchall()
             except:
@@ -720,10 +721,10 @@ class PlacefileAllTeamsHistoryContent(Resource):
             for i, row in enumerate(history_rows):
                 try:
                     start_time = row[0]
-                    if i == len(history_rows) - 1:
+                    if i == 0:
                         end_time = (datetime.now(tz=pytz.UTC) + timedelta(seconds=30)).strftime(std_fmt)
                     else:
-                        end_time = history_rows[i + 1][0]
+                        end_time = history_rows[i - 1][0]
                     this_output = f"TimeRange: {start_time} {end_time}\n"
                     this_output += f"Object: {row[1]:.4f},{row[2]:.4f}\n"
                     if row[3] > 0:
@@ -742,7 +743,10 @@ class PlacefileAllTeamsHistoryContent(Resource):
                         f'Fuel Remaining: {row[7]:.2f} gallons\\n'
                         f'{row[6]}"'
                     )
-                    this_output += file_footertext(team.name)
+                    if i == 0:
+                        this_output += file_footertext(team.name)
+                    else:
+                        this_output += file_footerend()
                     this_output += '\n\n'
                     output += this_output
                 except:
@@ -814,11 +818,11 @@ class PlacefileSingleTeamTracksContent(Resource):
         for i, row in enumerate(history_rows):
             try:
                 start_time = row[0]
-                if i == len(history_rows) - 1:
+                if i == 0:
                     end_time = (datetime.now(tz=pytz.UTC) + timedelta(seconds=30)).strftime(std_fmt)
                     arrow_icon = f"Icon: 0,0,{row[4]:03d},2,15,\n"
                 else:
-                    end_time = history_rows[i + 1][0]
+                    end_time = history_rows[i - 1][0]
                     arrow_icon = ""
                 this_output = f"Object: {row[1]:.4f},{row[2]:.4f}\n"
                 if row[3] > 0:
@@ -841,9 +845,10 @@ class PlacefileSingleTeamTracksContent(Resource):
                         f'Fuel Remaining: {row[7]:.2f} gallons\\n'
                         f'{row[6]}"'
                     )
+                    this_output += file_footertext(team.name)
                 else:
                     this_output += f'Icon: 0,0,{direction:03d},6,{color_code},\n'
-                this_output += file_footertext(team.name)
+                    this_output += file_footerend()
                 this_output += '\n\n'
                 output += this_output
             except:
@@ -868,7 +873,7 @@ class PlacefileSingleTeamHistoryContent(Resource):
             team.cur.execute(
                 "SELECT cur_timestamp, latitude, longitude, speed, direction, status_color, "
                 "status_text, fuel_level "
-                "FROM team_history ORDER BY cur_timestamp"
+                "FROM team_history ORDER BY cur_timestamp DESC"
             )
             history_rows = team.cur.fetchall()
         except:
@@ -876,10 +881,10 @@ class PlacefileSingleTeamHistoryContent(Resource):
         for i, row in enumerate(history_rows):
             try:
                 start_time = row[0]
-                if i == len(history_rows) - 1:
+                if i == 0:
                     end_time = (datetime.now(tz=pytz.UTC) + timedelta(seconds=30)).strftime(std_fmt)
                 else:
-                    end_time = history_rows[i + 1][0]
+                    end_time = history_rows[i - 1][0]
                 this_output = f"TimeRange: {start_time} {end_time}\n"
                 this_output += f"Object: {row[1]:.4f},{row[2]:.4f}\n"
                 if row[3] > 0:
@@ -901,7 +906,10 @@ class PlacefileSingleTeamHistoryContent(Resource):
                     f'Fuel Remaining: {row[7]:.2f} gallons\\n'
                     f'{row[6]}"'
                 )
-                this_output += file_footertext(team.name)
+                if i == 0:
+                    this_output += file_footertext(team.name)
+                else:
+                    this_output += file_footerend()
                 this_output += '\n\n'
                 output += this_output
             except:

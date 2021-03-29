@@ -236,8 +236,6 @@ class TeamResource(Resource):
 
             team, hazard_registry = get_team_and_hazard_registry(team_id)
             message_list = []
-            triggers.append(message_list)
-            triggers.append([haz.type for haz in team.active_hazards])
 
             if team.status['pin'] != pin:
                 return {"error": True, "error_message": "invalid pin"}, 403
@@ -258,7 +256,7 @@ class TeamResource(Resource):
             # Movement Updates
             current_time = datetime.now(tz=pytz.UTC)
             try:
-                diff_time = (current_time - team.last_update_time).total_seconds()
+                diff_time = (current_time - team.last_update).total_seconds()
             except:
                 # If this gets messed up, default to usual ping
                 diff_time = 10
@@ -343,11 +341,6 @@ class TeamResource(Resource):
             output['debug'] = {key: request.form[key] for key in ("pin", "speed", "direction", "refuel")}
             output['debug']['triggers'] = triggers
             output['debug']['active_hazards'] = [haz.type for haz in team.active_hazards]
-
-            del team
-            del message_list
-            del triggers
-            del hazard_registry
 
             return output
         except Exception as exc:

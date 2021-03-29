@@ -422,7 +422,10 @@ class TeamPoints(Resource):
         elif 'pin' not in request.form and 'auth' not in request.form:
             return {"error": True, "error_message": "need authorization"}, 403
 
-        team.points += int(request.form['points'])
+        try:
+            team.points += int(request.form['points'])
+        except:
+            team.points = int(request.form['points'])
 
         team.write_status()
 

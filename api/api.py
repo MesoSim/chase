@@ -743,10 +743,7 @@ class PlacefileAllTeamsHistoryContent(Resource):
                         f'Fuel Remaining: {row[7]:.2f} gallons\\n'
                         f'{row[6]}"'
                     )
-                    if i == 0:
-                        this_output += file_footertext(team.name)
-                    else:
-                        this_output += file_footerend()
+                    this_output += file_footertext(team.name)
                     this_output += '\n\n'
                     output += this_output
                 except:
@@ -906,10 +903,7 @@ class PlacefileSingleTeamHistoryContent(Resource):
                     f'Fuel Remaining: {row[7]:.2f} gallons\\n'
                     f'{row[6]}"'
                 )
-                if i == 0:
-                    this_output += file_footertext(team.name)
-                else:
-                    this_output += file_footerend()
+                this_output += file_footertext(team.name)
                 this_output += '\n\n'
                 output += this_output
             except:

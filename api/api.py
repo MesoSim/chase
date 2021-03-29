@@ -339,7 +339,7 @@ class TeamResource(Resource):
             output['messages'] = message_list
             output['debug'] = {key: request.form[key] for key in ("pin", "speed", "direction", "refuel")}
             output['debug']['triggers'] = triggers
-            output['debug']['active_hazards'] = team.active_hazards
+            output['debug']['active_hazards'] = [haz.type for haz in team.active_hazards]
 
             return output
         except Exception as exc:
@@ -784,7 +784,7 @@ class PlacefileSingleTeamCurrentContent(Resource):
         if team.latitude is not None and team.speed is not None:
             output += f"Object: {team.latitude:.4f},{team.longitude:.4f}\n"
             if team.speed > 0:
-                output += f"Icon: 0,0,{team.direction:3d},2,15,\n"
+                output += f"Icon: 0,0,{team.direction:03d},2,15,\n"
                 direction = team.direction
                 heading_row = f"Heading: {direction_angle_to_str(team.direction)}\\n"
             else:
@@ -795,7 +795,7 @@ class PlacefileSingleTeamCurrentContent(Resource):
             else:
                 color_code = {"green": 2, "yellow": 6, "red": 10}[team.status_color]
             output += (
-                f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\\n'
+                f'Icon: 0,0,{direction:03d},6,{color_code}, "Team: {team.name}\\n'
                 f'{team.last_update.strftime("%Y-%m-%d %H:%M:%S")} UTC\\n'
                 f'Car type: {team.vehicle.print_name}\\n'
                 f'Speed: {team.speed:.1f} mph\\n{heading_row}'

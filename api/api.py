@@ -339,6 +339,7 @@ class TeamResource(Resource):
             output['messages'] = message_list
             output['debug'] = {key: request.form[key] for key in ("pin", "speed", "direction", "refuel")}
             output['debug']['triggers'] = triggers
+            output['debug']['active_hazards'] = team.active_hazards
 
             return output
         except Exception as exc:

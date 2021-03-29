@@ -606,7 +606,7 @@ class PlacefileAllTeamsCurrentContent(Resource):
             if team.latitude is not None and team.speed is not None:
                 output += f"Object: {team.latitude:.4f},{team.longitude:.4f}\n"
                 if team.speed > 0:
-                    output += f"Icon: 0,0,{team.direction:3d},2,15,\n"
+                    output += f"Icon: 0,0,{team.direction:03d},2,15,\n"
                     direction = team.direction
                     heading_row = f"Heading: {direction_angle_to_str(team.direction)}\\n"
                 else:
@@ -617,7 +617,7 @@ class PlacefileAllTeamsCurrentContent(Resource):
                 else:
                     color_code = {"green": 2, "yellow": 6, "red": 10}[team.status_color]
                 output += (
-                    f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\\n'
+                    f'Icon: 0,0,{direction:03d},6,{color_code}, "Team: {team.name}\\n'
                     f'{team.last_update.strftime("%Y-%m-%d %H:%M:%S")} UTC\\n'
                     f'Car type: {team.vehicle.print_name}\\n'
                     f'Speed: {team.speed:.1f} mph\\n{heading_row}'
@@ -657,7 +657,7 @@ class PlacefileAllTeamsTracksContent(Resource):
                 start_time = row[0]
                 if i == len(history_rows) - 1:
                     end_time = (datetime.now(tz=pytz.UTC) + timedelta(seconds=30)).strftime(std_fmt)
-                    arrow_icon = f"Icon: 0,0,{row[4]:3d},2,15,\n"
+                    arrow_icon = f"Icon: 0,0,{row[4]:03d},2,15,\n"
                 else:
                     end_time = history_rows[i + 1][0]
                     arrow_icon = ""
@@ -675,7 +675,7 @@ class PlacefileAllTeamsTracksContent(Resource):
                     color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
                 if arrow_icon:
                     output += (
-                        f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\\n'
+                        f'Icon: 0,0,{direction:03d},6,{color_code}, "Team: {team.name}\\n'
                         f'{start_time}\\n'
                         f'Car type: {team.vehicle.print_name}\\n'
                         f'Speed: {row[3]:.1f} mph\\n{heading_row}'
@@ -683,7 +683,7 @@ class PlacefileAllTeamsTracksContent(Resource):
                         f'{row[6]}"'
                     )
                 else:
-                    output += f'Icon: 0,0,{direction:3d},6,{color_code},\n'
+                    output += f'Icon: 0,0,{direction:03d},6,{color_code},\n'
                 output += file_footertext(team.name)
                 output += '\n\n'
 
@@ -722,7 +722,7 @@ class PlacefileAllTeamsHistoryContent(Resource):
                 output += f"TimeRange: {start_time} {end_time}\n"
                 output += f"Object: {row[1]:.4f},{row[2]:.4f}\n"
                 if row[3] > 0:
-                    output += f"Icon: 0,0,{row[4]:3d},2,15,\n"
+                    output += f"Icon: 0,0,{row[4]:03d},2,15,\n"
                     direction = row[4]
                     heading_row = f"Heading: {direction_angle_to_str(row[4])}\\n"
                 else:
@@ -733,7 +733,7 @@ class PlacefileAllTeamsHistoryContent(Resource):
                 except:
                     color_code = 2
                 output += (
-                    f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\\n'
+                    f'Icon: 0,0,{direction:03d},6,{color_code}, "Team: {team.name}\\n'
                     f'{start_time}\\n'
                     f'Car type: {team.vehicle.print_name}\\n'
                     f'Speed: {row[3]:.1f} mph\\n{heading_row}'
@@ -810,7 +810,7 @@ class PlacefileSingleTeamTracksContent(Resource):
             start_time = row[0]
             if i == len(history_rows) - 1:
                 end_time = (datetime.now(tz=pytz.UTC) + timedelta(seconds=30)).strftime(std_fmt)
-                arrow_icon = f"Icon: 0,0,{row[4]:3d},2,15,\n"
+                arrow_icon = f"Icon: 0,0,{row[4]:03d},2,15,\n"
             else:
                 end_time = history_rows[i + 1][0]
                 arrow_icon = ""
@@ -828,7 +828,7 @@ class PlacefileSingleTeamTracksContent(Resource):
                 color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
             if arrow_icon:
                 output += (
-                    f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\\n'
+                    f'Icon: 0,0,{direction:03d},6,{color_code}, "Team: {team.name}\\n'
                     f'{start_time}\\n'
                     f'Car type: {team.vehicle.print_name}\\n'
                     f'Speed: {row[3]:.1f} mph\\n{heading_row}'
@@ -836,7 +836,7 @@ class PlacefileSingleTeamTracksContent(Resource):
                     f'{row[6]}"'
                 )
             else:
-                output += f'Icon: 0,0,{direction:3d},6,{color_code},\n'
+                output += f'Icon: 0,0,{direction:03d},6,{color_code},\n'
             output += file_footertext(team.name)
             output += '\n\n'
 
@@ -873,7 +873,7 @@ class PlacefileSingleTeamHistoryContent(Resource):
             output += f"TimeRange: {start_time} {end_time}\n"
             output += f"Object: {row[1]:.4f},{row[2]:.4f}\n"
             if row[3] > 0:
-                output += f"Icon: 0,0,{row[4]:3d},2,15,\n"
+                output += f"Icon: 0,0,{row[4]:03d},2,15,\n"
                 direction = row[4]
                 heading_row = f"Heading: {direction_angle_to_str(row[4])}\\n"
             else:
@@ -884,7 +884,7 @@ class PlacefileSingleTeamHistoryContent(Resource):
             else:
                 color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
             output += (
-                f'Icon: 0,0,{direction:3d},6,{color_code}, "Team: {team.name}\\n'
+                f'Icon: 0,0,{direction:03d},6,{color_code}, "Team: {team.name}\\n'
                 f'{start_time}\\n'
                 f'Car type: {team.vehicle.print_name}\\n'
                 f'Speed: {row[3]:.1f} mph\\n{heading_row}'

@@ -565,7 +565,7 @@ class PlacefileLsrLoad(Resource):
         lsr_con = sql.connect(lsr_db_file)
         lsr_cur = lsr_con.cursor()
         lsr_cur.execute(
-            "CREATE TABLE lsrs_raw (city char, county char, lat decimal, "
+            "CREATE TABLE IF NOT EXISTS lsrs_raw (city char, county char, lat decimal, "
             + "lon decimal,magnitude char, remark char, source char, st char, "
             + "type char, typetext char, valid datetime, wfo char)"
         )

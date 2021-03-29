@@ -344,6 +344,11 @@ class TeamResource(Resource):
             output['debug']['triggers'] = triggers
             output['debug']['active_hazards'] = [haz.type for haz in team.active_hazards]
 
+            del team
+            del message_list
+            del triggers
+            del hazard_registry
+
             return output
         except Exception as exc:
             return {"error": True, "error_message": str(exc), "traceback": traceback.format_exc()}, 500

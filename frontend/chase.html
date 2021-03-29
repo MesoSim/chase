@@ -291,9 +291,9 @@
                     $(".dir-button").prop("disabled", false);
                 }
                 if( data.can_move ){
-                    $("#speedRange").prop("readonly", false);
+                    $("#speedRange").prop("disabled", false);
                 } else {
-                    $("#speedRange").prop("readonly", true);
+                    $("#speedRange").prop("disabled", true);
                 }
 
                 if( data.messages ){

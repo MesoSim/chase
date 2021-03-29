@@ -37,7 +37,7 @@
                             </tr>
                             <tr id="team-fuel-row">
                                 <th scope="row">Fuel</th>
-                                <td><span id="team-fuel">Undefined</span> <button class="btn btn-sm btn-light align-right" id="refuel-button" onclick="toggleRefuel();">Refuel</button></td>
+                                <td><span id="team-fuel">Undefined</span> <button class="btn btn-sm btn-light align-right not-refueling" id="refuel-button" onclick="toggleRefuel();">Refuel</button></td>
                             </tr>
                             <tr id="team-balance-row">
                                 <th scope="row">Balance</th>
@@ -201,9 +201,6 @@
                 if( localStorage.getItem("direction") == '' ){
                     localStorage.setItem("direction", 0)
                 }
-                if( localStorage.getItem("is_refueling") == '' ){
-                    localStorage.setItem("is_refueling", false)
-                }
                 $.ajax({
                     method: "PUT",
                     url: api_base + "team/" + localStorage.getItem("team_id"),
@@ -213,7 +210,7 @@
                         'pin': localStorage.getItem("pin"),
                         'speed': $("#speedRange").val(),
                         'direction': localStorage.getItem("direction"),
-                        'refuel': localStorage.getItem("is_refueling")
+                        'refuel': $("#refuel-button").hasClass("refueling")
                     },
                     success: checkStatusSuccess,
                     error: checkServerError
@@ -264,11 +261,12 @@
                 if( data.fuel_on_empty_fee ){
                     alert("You ran out of fuel!");
                     startRefuel();
+                    $("#refuel-button").prop("disabled", false);
                 }
                 if( data.can_refuel ){
                     $("#refuel-button").prop("disabled", false);
                 } else {
-                    $("#refuel-button").prop("disabled", true);
+                    $("#refuel-button.not-refueling").prop("disabled", true);
                 }
                 $("#team-balance").text(data.balance);
                 if( data.balance_color && data.balance_color != "success" ){
@@ -306,7 +304,7 @@
             }
 
             function toggleRefuel() {
-                if( localStorage.getItem("is_refueling") ){
+                if( $("#refuel-button").hasClass("refueling") ){
                     stopRefuel();
                 } else {
                     startRefuel();
@@ -314,14 +312,12 @@
             }
 
             function startRefuel() {
-                localStorage.setItem("is_refueling", true);
-                $("#refuel-button").removeClass("btn-light").addClass("btn-dark").text("Refueling...click to stop...");
+                $("#refuel-button").removeClass("btn-light not-refueling").addClass("btn-dark refueling").text("Refueling...click to stop...");
                 setSpeed(0);
             }
 
             function stopRefuel() {
-                localStorage.setItem("is_refueling", false);
-                $("#refuel-button").removeClass("btn-dark").addClass("btn-light").text("Refuel");
+                $("#refuel-button").removeClass("btn-dark refueling").addClass("btn-light not-refueling").text("Refuel");
                 setSpeed(localStorage.getItem("old_speed"));
             }
 

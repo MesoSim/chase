@@ -236,6 +236,8 @@ class TeamResource(Resource):
 
             team, hazard_registry = get_team_and_hazard_registry(team_id)
             message_list = []
+            triggers.append(message_list)
+            triggers.append([haz.type for haz in team.active_hazards])
 
             if team.status['pin'] != pin:
                 return {"error": True, "error_message": "invalid pin"}, 403
@@ -295,6 +297,7 @@ class TeamResource(Resource):
             ongoing_hazards = [haz for haz in team.active_hazards if haz.expiry_time > datetime.now(tz=pytz.UTC)]
             expired_hazards = [haz for haz in team.active_hazards if haz.expiry_time <= datetime.now(tz=pytz.UTC)]
             for haz in expired_hazards:
+                triggers.append(f"found hazard {haz.type}")
                 message_list.append(haz.generate_expiry_message())
             if len(ongoing_hazards) > 0:
                 team.active_hazards = ongoing_hazards

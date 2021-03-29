@@ -654,38 +654,42 @@ class PlacefileAllTeamsTracksContent(Resource):
             except:
                 history_rows = []
             for i, row in enumerate(history_rows):
-                start_time = row[0]
-                if i == len(history_rows) - 1:
-                    end_time = (datetime.now(tz=pytz.UTC) + timedelta(seconds=30)).strftime(std_fmt)
-                    arrow_icon = f"Icon: 0,0,{row[4]:03d},2,15,\n"
-                else:
-                    end_time = history_rows[i + 1][0]
-                    arrow_icon = ""
-                output += f"Object: {row[1]:.4f},{row[2]:.4f}\n"
-                if row[3] > 0:
-                    output += arrow_icon
-                    direction = row[4]
-                    heading_row = f"Heading: {direction_angle_to_str(row[4])}\\n"
-                else:
-                    direction = 0
-                    heading_row = ""
-                if row[5] is None:
-                    color_code = 2
-                else:
-                    color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
-                if arrow_icon:
-                    output += (
-                        f'Icon: 0,0,{direction:03d},6,{color_code}, "Team: {team.name}\\n'
-                        f'{start_time}\\n'
-                        f'Car type: {team.vehicle.print_name}\\n'
-                        f'Speed: {row[3]:.1f} mph\\n{heading_row}'
-                        f'Fuel Remaining: {row[7]:.2f} gallons\\n'
-                        f'{row[6]}"'
-                    )
-                else:
-                    output += f'Icon: 0,0,{direction:03d},6,{color_code},\n'
-                output += file_footertext(team.name)
-                output += '\n\n'
+                try:
+                    start_time = row[0]
+                    if i == len(history_rows) - 1:
+                        end_time = (datetime.now(tz=pytz.UTC) + timedelta(seconds=30)).strftime(std_fmt)
+                        arrow_icon = f"Icon: 0,0,{row[4]:03d},2,15,\n"
+                    else:
+                        end_time = history_rows[i + 1][0]
+                        arrow_icon = ""
+                    this_output = f"Object: {row[1]:.4f},{row[2]:.4f}\n"
+                    if row[3] > 0:
+                        this_output += arrow_icon
+                        direction = row[4]
+                        heading_row = f"Heading: {direction_angle_to_str(row[4])}\\n"
+                    else:
+                        direction = 0
+                        heading_row = ""
+                    if row[5] is None:
+                        color_code = 2
+                    else:
+                        color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
+                    if arrow_icon:
+                        this_output += (
+                            f'Icon: 0,0,{direction:03d},6,{color_code}, "Team: {team.name}\\n'
+                            f'{start_time}\\n'
+                            f'Car type: {team.vehicle.print_name}\\n'
+                            f'Speed: {row[3]:.1f} mph\\n{heading_row}'
+                            f'Fuel Remaining: {row[7]:.2f} gallons\\n'
+                            f'{row[6]}"'
+                        )
+                    else:
+                        this_output += f'Icon: 0,0,{direction:03d},6,{color_code},\n'
+                    this_output += file_footertext(team.name)
+                    this_output += '\n\n'
+                    output += this_output
+                except:
+                    pass
 
         response = make_response(output)
         response.headers['content-type'] = 'text/plain'
@@ -714,34 +718,35 @@ class PlacefileAllTeamsHistoryContent(Resource):
             except:
                 history_rows = []
             for i, row in enumerate(history_rows):
-                start_time = row[0]
-                if i == len(history_rows) - 1:
-                    end_time = (datetime.now(tz=pytz.UTC) + timedelta(seconds=30)).strftime(std_fmt)
-                else:
-                    end_time = history_rows[i + 1][0]
-                output += f"TimeRange: {start_time} {end_time}\n"
-                output += f"Object: {row[1]:.4f},{row[2]:.4f}\n"
-                if row[3] > 0:
-                    output += f"Icon: 0,0,{row[4]:03d},2,15,\n"
-                    direction = row[4]
-                    heading_row = f"Heading: {direction_angle_to_str(row[4])}\\n"
-                else:
-                    direction = 0
-                    heading_row = ""
                 try:
+                    start_time = row[0]
+                    if i == len(history_rows) - 1:
+                        end_time = (datetime.now(tz=pytz.UTC) + timedelta(seconds=30)).strftime(std_fmt)
+                    else:
+                        end_time = history_rows[i + 1][0]
+                    this_output = f"TimeRange: {start_time} {end_time}\n"
+                    this_output += f"Object: {row[1]:.4f},{row[2]:.4f}\n"
+                    if row[3] > 0:
+                        this_output += f"Icon: 0,0,{row[4]:03d},2,15,\n"
+                        direction = row[4]
+                        heading_row = f"Heading: {direction_angle_to_str(row[4])}\\n"
+                    else:
+                        direction = 0
+                        heading_row = ""
                     color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
+                    this_output += (
+                        f'Icon: 0,0,{direction:03d},6,{color_code}, "Team: {team.name}\\n'
+                        f'{start_time}\\n'
+                        f'Car type: {team.vehicle.print_name}\\n'
+                        f'Speed: {row[3]:.1f} mph\\n{heading_row}'
+                        f'Fuel Remaining: {row[7]:.2f} gallons\\n'
+                        f'{row[6]}"'
+                    )
+                    this_output += file_footertext(team.name)
+                    this_output += '\n\n'
+                    output += this_output
                 except:
-                    color_code = 2
-                output += (
-                    f'Icon: 0,0,{direction:03d},6,{color_code}, "Team: {team.name}\\n'
-                    f'{start_time}\\n'
-                    f'Car type: {team.vehicle.print_name}\\n'
-                    f'Speed: {row[3]:.1f} mph\\n{heading_row}'
-                    f'Fuel Remaining: {row[7]:.2f} gallons\\n'
-                    f'{row[6]}"'
-                )
-                output += file_footertext(team.name)
-                output += '\n\n'
+                    pass
         
         response = make_response(output)
         response.headers['content-type'] = 'text/plain'
@@ -807,38 +812,42 @@ class PlacefileSingleTeamTracksContent(Resource):
             history_rows = []
         
         for i, row in enumerate(history_rows):
-            start_time = row[0]
-            if i == len(history_rows) - 1:
-                end_time = (datetime.now(tz=pytz.UTC) + timedelta(seconds=30)).strftime(std_fmt)
-                arrow_icon = f"Icon: 0,0,{row[4]:03d},2,15,\n"
-            else:
-                end_time = history_rows[i + 1][0]
-                arrow_icon = ""
-            output += f"Object: {row[1]:.4f},{row[2]:.4f}\n"
-            if row[3] > 0:
-                output += arrow_icon
-                direction = row[4]
-                heading_row = f"Heading: {direction_angle_to_str(row[4])}\\n"
-            else:
-                direction = 0
-                heading_row = ""
-            if row[5] is None:
-                color_code = 2
-            else:
-                color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
-            if arrow_icon:
-                output += (
-                    f'Icon: 0,0,{direction:03d},6,{color_code}, "Team: {team.name}\\n'
-                    f'{start_time}\\n'
-                    f'Car type: {team.vehicle.print_name}\\n'
-                    f'Speed: {row[3]:.1f} mph\\n{heading_row}'
-                    f'Fuel Remaining: {row[7]:.2f} gallons\\n'
-                    f'{row[6]}"'
-                )
-            else:
-                output += f'Icon: 0,0,{direction:03d},6,{color_code},\n'
-            output += file_footertext(team.name)
-            output += '\n\n'
+            try:
+                start_time = row[0]
+                if i == len(history_rows) - 1:
+                    end_time = (datetime.now(tz=pytz.UTC) + timedelta(seconds=30)).strftime(std_fmt)
+                    arrow_icon = f"Icon: 0,0,{row[4]:03d},2,15,\n"
+                else:
+                    end_time = history_rows[i + 1][0]
+                    arrow_icon = ""
+                this_output = f"Object: {row[1]:.4f},{row[2]:.4f}\n"
+                if row[3] > 0:
+                    this_output += arrow_icon
+                    direction = row[4]
+                    heading_row = f"Heading: {direction_angle_to_str(row[4])}\\n"
+                else:
+                    direction = 0
+                    heading_row = ""
+                if row[5] is None:
+                    color_code = 2
+                else:
+                    color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
+                if arrow_icon:
+                    this_output += (
+                        f'Icon: 0,0,{direction:03d},6,{color_code}, "Team: {team.name}\\n'
+                        f'{start_time}\\n'
+                        f'Car type: {team.vehicle.print_name}\\n'
+                        f'Speed: {row[3]:.1f} mph\\n{heading_row}'
+                        f'Fuel Remaining: {row[7]:.2f} gallons\\n'
+                        f'{row[6]}"'
+                    )
+                else:
+                    this_output += f'Icon: 0,0,{direction:03d},6,{color_code},\n'
+                this_output += file_footertext(team.name)
+                this_output += '\n\n'
+                output += this_output
+            except:
+                pass
 
         response = make_response(output)
         response.headers['content-type'] = 'text/plain'
@@ -865,34 +874,38 @@ class PlacefileSingleTeamHistoryContent(Resource):
         except:
             history_rows = []
         for i, row in enumerate(history_rows):
-            start_time = row[0]
-            if i == len(history_rows) - 1:
-                end_time = (datetime.now(tz=pytz.UTC) + timedelta(seconds=30)).strftime(std_fmt)
-            else:
-                end_time = history_rows[i + 1][0]
-            output += f"TimeRange: {start_time} {end_time}\n"
-            output += f"Object: {row[1]:.4f},{row[2]:.4f}\n"
-            if row[3] > 0:
-                output += f"Icon: 0,0,{row[4]:03d},2,15,\n"
-                direction = row[4]
-                heading_row = f"Heading: {direction_angle_to_str(row[4])}\\n"
-            else:
-                direction = 0
-                heading_row = ""
-            if row[5] is None:
-                color_code = 2
-            else:
-                color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
-            output += (
-                f'Icon: 0,0,{direction:03d},6,{color_code}, "Team: {team.name}\\n'
-                f'{start_time}\\n'
-                f'Car type: {team.vehicle.print_name}\\n'
-                f'Speed: {row[3]:.1f} mph\\n{heading_row}'
-                f'Fuel Remaining: {row[7]:.2f} gallons\\n'
-                f'{row[6]}"'
-            )
-            output += file_footertext(team.name)
-            output += '\n\n'
+            try:
+                start_time = row[0]
+                if i == len(history_rows) - 1:
+                    end_time = (datetime.now(tz=pytz.UTC) + timedelta(seconds=30)).strftime(std_fmt)
+                else:
+                    end_time = history_rows[i + 1][0]
+                this_output = f"TimeRange: {start_time} {end_time}\n"
+                this_output += f"Object: {row[1]:.4f},{row[2]:.4f}\n"
+                if row[3] > 0:
+                    this_output += f"Icon: 0,0,{row[4]:03d},2,15,\n"
+                    direction = row[4]
+                    heading_row = f"Heading: {direction_angle_to_str(row[4])}\\n"
+                else:
+                    direction = 0
+                    heading_row = ""
+                if row[5] is None:
+                    color_code = 2
+                else:
+                    color_code = {"green": 2, "yellow": 6, "red": 10}[row[5]]
+                this_output += (
+                    f'Icon: 0,0,{direction:03d},6,{color_code}, "Team: {team.name}\\n'
+                    f'{start_time}\\n'
+                    f'Car type: {team.vehicle.print_name}\\n'
+                    f'Speed: {row[3]:.1f} mph\\n{heading_row}'
+                    f'Fuel Remaining: {row[7]:.2f} gallons\\n'
+                    f'{row[6]}"'
+                )
+                this_output += file_footertext(team.name)
+                this_output += '\n\n'
+                output += this_output
+            except:
+                pass
 
         response = make_response(output)
         response.headers['content-type'] = 'text/plain'

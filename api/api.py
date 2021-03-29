@@ -28,6 +28,7 @@ from mesosim.core.timing import arc_time_from_cur, std_fmt
 from mesosim.core.utils import direction_angle_to_str, money_format, move_lat_lon
 from mesosim.lsr import scale_raw_lsr_to_cur_time, gr_lsr_placefile_entry_from_tuple
 import numpy as np
+import requests
 
 
 # Constants
@@ -220,9 +221,13 @@ class TeamResource(Resource):
                 triggers.append("direction set to 0 from input")
             try:
                 refuel = (request.form['refuel'] == "true")
-                triggers.append("refueling!")
+                if refuel:
+                    triggers.append("refueling!")
+                else:
+                    triggers.append("not refueling")
             except:
                 refuel = False
+                triggers.append("not refueling")
 
             team = get_team(team_id)
             message_list = []
@@ -280,6 +285,8 @@ class TeamResource(Resource):
 
             # Current hazard/hazard expiry
             # Need to partition into ongoing and expired
+            if len(team.active_hazards) > 0:
+                triggers.append("we have active hazards")
             ongoing_hazards = [haz for haz in team.active_hazards if haz.expiry_time > datetime.now(tz=pytz.UTC)]
             expired_hazards = [haz for haz in team.active_hazards if haz.expiry_time <= datetime.now(tz=pytz.UTC)]
             for haz in expired_hazards:

@@ -1016,6 +1016,26 @@ class SimRunning(Resource):
 
 api.add_resource(SimRunning, '/simulation/running')
 
+class SimDisplay(Resource):
+    def get(self):
+        try:
+            display_items = []
+            config.cur.execute("SELECT arc_time, type, filename FROM display_queue ORDER BY arc_time DESC")
+            for row in config.cur.fetchall():
+                display_items.append({
+                    'arc_time': row[0],
+                    'type': row[1],
+                    'url': str(config.get_config_value("display_base_url")) + row[2]
+                })
+            return {
+                'success': True,
+                'items': display_items
+            }
+        except:
+            return {'error': True, 'error_message': traceback.format_exc()}, 500
+
+api.add_resource(SimDisplay, '/simulation/display')
+
 class SimConfig(Resource):
     def put(self):
         if config.get_config_value('auth') != request.form['auth']:

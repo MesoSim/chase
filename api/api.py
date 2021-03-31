@@ -241,7 +241,7 @@ class TeamLeaderboard(Resource):
                 team_tuples.append((team.name, team.points))
             except:
                 pass
-        for i, (team_name, team_points) in enumerate(team_tuples.sort(key=lambda t: -t[1])):
+        for i, (team_name, team_points) in enumerate(sorted(team_tuples, key=lambda t: -t[1])):
             output += f'<p>{i + 1}) {team_name} ({team_points} pts)</p>'
         output += '</div></div></div></body></html>'
         response = make_response(output)

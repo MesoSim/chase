@@ -242,7 +242,7 @@ class TeamLeaderboard(Resource):
             except:
                 pass
         for i, (team_name, team_points) in enumerate(sorted(team_tuples, key=lambda t: -t[1])):
-            output += f'<p>{i + 1}) {team_name} ({team_points} pts)</p>'
+            output += f'<p class="mb-1">{i + 1}) {team_name} ({team_points} pts)</p>'
         output += '</div></div></div></body></html>'
         response = make_response(output)
         response.headers['content-type'] = 'text/html'

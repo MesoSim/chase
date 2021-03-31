@@ -148,12 +148,18 @@ class TeamList(Resource):
                 message = search_result[0][2]
                 if search_result[0][3] is not None and len(search_result[0][3]) > 0:
                     vehicle_type = search_result[0][3]
+                    
+                    # Handle vehicle-specific setup
+                    vehicle = Vehicle(vehicle_type, config)
+                    fuel_level = (1 + np.random.random()) * 0.5 * vehicle.fuel_cap
+                else:
+                    vehicle = None
+
                 if search_result[0][4] is not None and float(search_result[0][4]) > 0:
                     budget_bonus = float(search_result[0][4])
+                else:
+                    budget_bonus = 0
                 
-                # Handle vehicle-specific setup
-                vehicle = Vehicle(vehicle_type, config)
-                fuel_level = (1 + np.random.random()) * 0.5 * vehicle.fuel_cap
             else:
                 budget_bonus = 0
                 vehicle = None

@@ -238,7 +238,7 @@ class TeamLeaderboard(Resource):
         for team_id in list_current_teams():
             try:
                 team = get_team(team_id)
-                team_tuples.append(team.name, team.points)
+                team_tuples.append((team.name, team.points))
             except:
                 pass
         for i, (team_name, team_points) in enumerate(team_tuples.sort(key=lambda t: -t[1])):

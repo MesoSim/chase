@@ -51,13 +51,13 @@
                     </div>
                     <div class="control light-background shadowed p-2 mb-2 d-none">
                         <div class="row">
-                            <div class="col">
+                            <div class="col-12 col-sm-6">
                                 <input class="custom-range" type="range" min="0" max="135" id="speedRange" value="0"><br>
                                 Current Speed: <span id="currentSpeed">0</span> mph<br>
                                 Current Max Speed: <span class="text-warning" id="maxSpeed">Undefined</span>
                             </div>
-                            <div class="col">
-                                <div style="max-width: 200px;" class="row">
+                            <div class="col-12 col-sm-6">
+                                <div style="width: 200px; margin: auto;" class="row">
                                     <button class="btn btn-secondary dir-button actual-dir" id="dir-315" onclick="selectDirection(this); setDirection(315);">NW</button>
                                     <button class="btn btn-secondary dir-button actual-dir north" id="dir-0" onclick="selectDirection(this); setDirection(0);">N</button>
                                     <button class="btn btn-secondary dir-button actual-dir" id="dir-45" onclick="selectDirection(this); setDirection(45);">NE</button>

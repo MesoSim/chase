@@ -239,13 +239,20 @@
                 $("#write-down-pin").text(localStorage.getItem("pin"));
 
                 if( data.easter_egg ){
-                    localStorage.setItem("team_vehicle", data.vehicle);
                     $("#team-name-form").addClass("d-none");
                     $("#team-info-msg").removeClass("d-none");
                     $("#team-info-msg").text(data.message);
-                    loadTeamVehicle();
-                    $("#team-info").removeClass("d-none");
-                    localStorage.setItem("setup_step", "team-info");
+                    if( data.vehicle ){
+                        localStorage.setItem("team_vehicle", data.vehicle);
+                        loadTeamVehicle();
+                        $("#team-info").removeClass("d-none");
+                        localStorage.setItem("setup_step", "team-info");
+                    } else {
+                        $("#team-name-form").addClass("d-none");
+                        loadVehicles();
+                        $("#vehicle-selection").removeClass("d-none");
+                        localStorage.setItem("setup_step", "vehicle-selection");
+                    }
                 } else {
                     $("#team-name-form").addClass("d-none");
                     loadVehicles();

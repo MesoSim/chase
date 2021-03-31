@@ -161,6 +161,7 @@ class TeamList(Resource):
                     budget_bonus = 0
                 
             else:
+                message = None
                 budget_bonus = 0
                 vehicle = None
 
@@ -201,10 +202,12 @@ class TeamList(Resource):
                 'team_name': team_name,
                 'easter_egg': False
             }
-            if vehicle is not None:
+            if message is not None:
                 output['easter_egg'] = True
-                output['vehicle'] = vehicle_type
                 output['message'] = message
+                output['vehicle'] = ''
+            if vehicle is not None:
+                output['vehicle'] = vehicle_type
             return output
         except Exception as exc:
             return {

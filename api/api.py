@@ -208,6 +208,48 @@ class TeamList(Resource):
 
 api.add_resource(TeamList, '/team')
 
+class TeamListSimple(Resource):
+
+    def get(self):
+        output = "\n".join(list_current_teams())
+        response = make_response(output)
+        response.headers['content-type'] = 'text/plain'
+        return response
+
+api.add_resource(TeamListSimple, '/team/list')
+
+class TeamLeaderboard(Resource):
+
+    def get(self):
+        output = (
+            '<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            '<meta name="viewport" content="width=device-width, initial-scale=1">'
+            '<link rel="stylesheet" '
+            'href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" '
+            'integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" '
+            'crossorigin="anonymous">'
+            '<title>ISU AMS Chase Simulation Leaderboard</title>'
+            r'<style>body {color: white; background: rgba(0, 0, 0, 0);}</style>'
+            '<body>'
+            '<div class="container-fluid"><div class="row justify-content-center"><div class="col-12">'
+            '<h4>Leaderboard</h4>'
+        )
+        team_tuples = []
+        for team_id in list_current_teams():
+            try:
+                team = get_team(team_id)
+                team_tuples.append(team.name, team.points)
+            except:
+                pass
+        for i, (team_name, team_points) in enumerate(team_tuples.sort(key=lambda t: -t[1])):
+            output += f'<p>{i + 1}) {team_name} ({team_points} pts)</p>'
+        output += '</div></div></div></body></html>'
+        response = make_response(output)
+        response.headers['content-type'] = 'text/html'
+        return response
+
+api.add_resource(TeamLeaderboard, '/team/leaderboard.html')
+
 class TeamResource(Resource):
     def get(self, team_id):
         return get_team(team_id).output_status_dict()

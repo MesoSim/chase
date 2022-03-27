@@ -7,13 +7,13 @@ function loadPlacefileLinks(chase_base_url, api_base) {
     //       that probably means loading these data from API, but oh well.
     var team_id = localStorage.getItem("team_id");
 
-    $("#l2-source").val(chase_base_url + "l2/");
-    $("#warnings-source").val(chase_base_url + "warnings/");
-    $("#lsr-placefile").val(chase_base_url + api_base + "placefile/lsr/content");
-    $("#team-current").val(chase_base_url + api_base + "placefile/team/" + team_id + "/current/content");
-    $("#team-tracks").val(chase_base_url + api_base + "placefile/team/" + team_id + "/tracks/content");
-    $("#team-history").val(chase_base_url + api_base + "placefile/team/" + team_id + "/history/content");
-    $("#all-current").val(chase_base_url + api_base + "placefile/team/current/content");
-    $("#all-tracks").val(chase_base_url + api_base + "placefile/team/tracks/content");
-    $("#all-history").val(chase_base_url + api_base + "placefile/team/history/content");
+    $("#l2-source").val(chase_base_url + "/l2/");
+    $("#warnings-source").val(chase_base_url + "/warnings/");
+    $("#lsr-placefile").val(chase_base_url + "/" + api_base + "placefile/lsr/content");
+    $("#team-current").val(chase_base_url + "/" + api_base + "placefile/team/" + team_id + "/current/content");
+    $("#team-tracks").val(chase_base_url + "/" + api_base + "placefile/team/" + team_id + "/tracks/content");
+    $("#team-history").val(chase_base_url + "/" + api_base + "placefile/team/" + team_id + "/history/content");
+    $("#all-current").val(chase_base_url + "/" + api_base + "placefile/team/current/content");
+    $("#all-tracks").val(chase_base_url + "/" + api_base + "placefile/team/tracks/content");
+    $("#all-history").val(chase_base_url + "/" + api_base + "placefile/team/history/content");
 }

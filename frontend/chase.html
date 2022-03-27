@@ -148,6 +148,7 @@
         <script src="assets/shared.js"></script>
         <script>
             var api_base = "api/";
+            var web_base = window.location.origin;
             var beats_to_next_ping = 20; // 10 seconds at 120 bpm
             var waiting = true;
 
@@ -325,7 +326,7 @@
                 $("#team-name-header").text(localStorage.getItem("team_name"));
                 $("#write-down-team-id").text(localStorage.getItem("team_id"));
                 $("#write-down-pin").text(localStorage.getItem("pin"));
-                loadPlacefileLinks(api_base);
+                loadPlacefileLinks(web_base, api_base);
                 loadTeamCurrentState();
                 startHeartbeat();
             });

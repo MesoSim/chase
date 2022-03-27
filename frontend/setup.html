@@ -183,6 +183,7 @@
         <script src="assets/shared.js"></script>
         <script>
             var api_base = "api/";
+            var web_base = window.location.origin;
             
             function string_to_slug(str) {
                 str = str.replace(/^\s+|\s+$/g, ""); // trim
@@ -342,7 +343,7 @@
 
             function continueToPlacefiles() {
                 $("#team-info").addClass("d-none");
-                loadPlacefileLinks(api_base);
+                loadPlacefileLinks(web_base, api_base);
                 $("#placefiles").removeClass("d-none");
                 localStorage.setItem("setup_step", "placefiles");
             }

@@ -35,11 +35,14 @@ import requests
 app = Flask(__name__)
 api = Api(app)
 
-lsr_db_file = "/home/jthielen/lsr.db"
-main_db_file = "/home/jthielen/main.db"
-team_db_dir = '/home/jthielen/teams/'
+root = "/data/"
+lsr_db_file = root + "lsr.db"
+main_db_file = root + "main.db"
+team_db_dir = root + 'teams/'
 
-lsr_asset_url = 'https://chase.iawx.info/assets/'
+with open(root + "url.txt", "r") as f:
+    base_url = f.readline().strip()
+    lsr_asset_url = base_url + '/assets/'
 
 config = Config(main_db_file)
 
